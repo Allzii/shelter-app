@@ -1,56 +1,37 @@
-# Welcome to your Expo app 👋
+﻿# TryggNära
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A mobile app project for people who need help reaching a shelter. The intended flow is for a wrist button to send a help request to nearby volunteers, who can accept or decline.
 
-## Get started
+## Current state
 
-1. Install dependencies
+The app currently contains a Swedish welcome screen and a role-selection screen. The welcome screen opens role selection; the information button and role choices are placeholders. Wrist-button integration, location matching, notifications, and accepting or declining requests are not implemented yet.
 
-   ```bash
-   npm install
-   ```
+## Development
 
-2. Start the app
+This project uses Expo SDK 57, React Native, TypeScript, Expo Router, and npm.
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```sh
+npm ci
+npm start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Use `npm run android`, `npm run ios`, or `npm run web` to start Expo for a specific platform. The iOS simulator requires macOS.
 
-### Other setup steps
+```sh
+npm run lint
+npm run typecheck
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Install new packages with `npx expo install <package>` to resolve SDK-compatible versions.
 
-## Learn more
+## Project structure
 
-To learn more about developing your project with Expo, look at the following resources:
+- `src/app/_layout.tsx`: root stack navigation.
+- `src/app/index.tsx`: welcome screen.
+- `src/app/role.tsx`: role selection.
+- `assets/images/tryggnara.png`: welcome-screen logo.
+- `app.json`: Expo configuration and launcher/splash assets.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Keep shared components, hooks, and utilities outside `src/app`, which is reserved for routes. Launcher icons and splash artwork still use the starter assets and need dedicated TryggNära artwork.
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+See the [Expo SDK 57 documentation](https://docs.expo.dev/versions/v57.0.0/) for APIs matching this project.
