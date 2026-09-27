@@ -19,7 +19,14 @@ export default function StartScreen() {
   };
 
   return (
+
+
     <SafeAreaView style={styles.container}>
+      <View style={styles.backgroundShapes} pointerEvents="none">
+        <View style={styles.circleTop} />
+        <View style={styles.circleRight} />
+        <View style={styles.circleBottom} />
+      </View>
       <View style={styles.main}>
         <Image
           source={require("../../assets/images/tryggnara.png")}
@@ -64,6 +71,50 @@ export default function StartScreen() {
 }
 
 const styles = StyleSheet.create({
+
+
+  backgroundShapes: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    overflow: "hidden",
+  },
+
+  circleTop: {
+    position: "absolute",
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: "#193A59",
+    top: -130,
+    left: -100,
+    opacity: 0.65,
+  },
+
+  circleRight: {
+    position: "absolute",
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: "#A8C8DE",
+    top: 190,
+    right: -120,
+    opacity: 0.6,
+  },
+
+  circleBottom: {
+    position: "absolute",
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: "#5687AE",
+    bottom: -210,
+    left: -80,
+    opacity: 0.7,
+  },
+
   container: {
     flex: 1,
     backgroundColor: "#EEF4F7",
