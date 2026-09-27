@@ -15,12 +15,10 @@ export default function StartScreen() {
   };
 
   const handleAbout = () => {
-    // Navigation to information page will be added later.
+    //lägg till sen
   };
 
   return (
-
-
     <SafeAreaView style={styles.container}>
       <View style={styles.backgroundShapes} pointerEvents="none">
         <View style={styles.circleTop} />
@@ -33,10 +31,10 @@ export default function StartScreen() {
           style={styles.logo}
         />
 
-        <Text style={styles.brand}>TRYGGNÄRA</Text>
+        <Text style={styles.brand}>TryggNära</Text>
 
         <Text style={styles.title}>
-          Du behöver inte{"\n"}gå ensam.
+          Du behöver inte{"\n"}gå ensam
         </Text>
 
         <Text style={styles.description}>
@@ -87,10 +85,10 @@ const styles = StyleSheet.create({
     width: 260,
     height: 260,
     borderRadius: 130,
-    backgroundColor: "#193A59",
+    backgroundColor: "#A8C8DE",
     top: -130,
     left: -100,
-    opacity: 0.65,
+    opacity: 0.75,
   },
 
   circleRight: {
@@ -98,10 +96,10 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     borderRadius: 90,
-    backgroundColor: "#A8C8DE",
+    backgroundColor: "#5687AE",
     top: 190,
     right: -120,
-    opacity: 0.6,
+    opacity: 0.45,
   },
 
   circleBottom: {
@@ -109,10 +107,10 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     borderRadius: 150,
-    backgroundColor: "#5687AE",
+    backgroundColor: "#254F75",
     bottom: -210,
     left: -80,
-    opacity: 0.7,
+    opacity: 0.4,
   },
 
   container: {
@@ -138,7 +136,7 @@ const styles = StyleSheet.create({
   brand: {
     fontSize: 15,
     fontWeight: "700",
-    letterSpacing: 3,
+   
     color: "#236C78",
     marginBottom: 18,
   },

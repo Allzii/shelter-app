@@ -1,4 +1,10 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  Accessibility,
+  HandHeart,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react-native";
+
 import { router } from "expo-router";
 import {
   Pressable,
@@ -10,7 +16,7 @@ import {
 
 export default function RoleScreen() {
   const selectNeedsHelp = () => {
-    // We will build this flow next.
+    router.push("/needs-help");
   };
 
   const selectHelper = () => {
@@ -27,7 +33,7 @@ export default function RoleScreen() {
             pressed && styles.pressed,
           ]}
         >
-          <Ionicons name="chevron-back" size={24} color="#2F6591" />
+          <ChevronLeft size={24} color="#2F6591" />
           <Text style={styles.backText}>Tillbaka</Text>
         </Pressable>
       </View>
@@ -51,8 +57,7 @@ export default function RoleScreen() {
             ]}
           >
             <View style={styles.iconContainer}>
-              <MaterialCommunityIcons
-                name="human-wheelchair"
+              <Accessibility
                 size={30}
                 color="#236C78"
               />
@@ -66,8 +71,7 @@ export default function RoleScreen() {
               </Text>
             </View>
 
-            <Ionicons
-              name="chevron-forward"
+            <ChevronRight
               size={24}
               color="#71808E"
             />
@@ -82,8 +86,7 @@ export default function RoleScreen() {
             ]}
           >
             <View style={styles.iconContainer}>
-              <MaterialCommunityIcons
-                name="hand-heart-outline"
+              <HandHeart
                 size={30}
                 color="#236C78"
               />
@@ -97,8 +100,7 @@ export default function RoleScreen() {
               </Text>
             </View>
 
-            <Ionicons
-              name="chevron-forward"
+            <ChevronRight
               size={24}
               color="#71808E"
             />
