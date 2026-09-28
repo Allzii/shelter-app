@@ -9,6 +9,8 @@ import {
 
 import { router } from "expo-router";
 
+import { ChevronRight } from "lucide-react-native";
+
 export default function StartScreen() {
   const handleGetStarted = () => {
     router.push("/role");
@@ -51,7 +53,11 @@ export default function StartScreen() {
           ]}
         >
           <Text style={styles.primaryButtonText}>Kom igång</Text>
-          <Text style={styles.arrow}>→</Text>
+          <ChevronRight
+            size={22}
+            color="#FFFFFF"
+            style={styles.arrow}
+          />
         </Pressable>
 
         <Pressable
@@ -136,7 +142,7 @@ const styles = StyleSheet.create({
   brand: {
     fontSize: 15,
     fontWeight: "700",
-   
+
     color: "#236C78",
     marginBottom: 18,
   },
@@ -188,9 +194,6 @@ const styles = StyleSheet.create({
   arrow: {
     position: "absolute",
     right: 22,
-    color: "#FFFFFF",
-    fontSize: 25,
-    fontWeight: "400",
   },
 
   aboutButton: {
