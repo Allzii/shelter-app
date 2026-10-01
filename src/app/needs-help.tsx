@@ -16,6 +16,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import FormInput from "@/components/ui/FormInput";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
+import {
+  capitalizeFirstLetter,
+  formatPhoneNumber,
+  formatPostalCode,
+} from "@/components/formatters";
 
 export default function NeedsHelpScreen() {
   const [firstName, setFirstName] = useState("");
@@ -25,52 +30,18 @@ export default function NeedsHelpScreen() {
   const [postalCode, setPostalCode] = useState("");
   const [city, setCity] = useState("");
 
-  const capitalizeFirstLetter = (value: string) => {
-    return value.replace(/^\s*\S/, (match) => match.toUpperCase());
-  };
-
-  const formatPhoneNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, "").slice(0, 10);
-
-    if (numbers.length <= 3) {
-      return numbers;
-    }
-
-    if (numbers.length <= 6) {
-      return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
-    }
-
-    if (numbers.length <= 8) {
-      return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)} ${numbers.slice(6)}`;
-    }
-
-    return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)} ${numbers.slice(
-      6,
-      8
-    )} ${numbers.slice(8, 10)}`;
-  };
-
-  const formatPostalCode = (value: string) => {
-    const numbers = value.replace(/\D/g, "").slice(0, 5);
-
-    if (numbers.length <= 3) {
-      return numbers;
-    }
-
-    return `${numbers.slice(0, 3)} ${numbers.slice(3)}`;
-  };
-
   const isComplete = Boolean(
     firstName.trim() &&
-    lastName.trim() &&
-    phone.replace(/\D/g, "").length === 10 &&
-    street.trim() &&
-    postalCode.replace(/\D/g, "").length === 5 &&
-    city.trim()
+      lastName.trim() &&
+      phone.replace(/\D/g, "").length === 10 &&
+      street.trim() &&
+      postalCode.replace(/\D/g, "").length === 5 &&
+      city.trim()
   );
 
   const handleContinue = () => {
-    //if (!isComplete) return;
+    // Restore validation after testing:
+    // if (!isComplete) return;
 
     Keyboard.dismiss();
     router.push("/emergency-contact");
@@ -134,7 +105,9 @@ export default function NeedsHelpScreen() {
             label="Adress"
             icon={MapPin}
             value={street}
-            onChangeText={(value) => setStreet(capitalizeFirstLetter(value))}
+            onChangeText={(value) =>
+              setStreet(capitalizeFirstLetter(value))
+            }
             placeholder="Gata och nummer"
             autoCapitalize="words"
             autoComplete="street-address"
@@ -159,7 +132,9 @@ export default function NeedsHelpScreen() {
               <TextInput
                 style={styles.smallInput}
                 value={city}
-                onChangeText={(value) => setCity(capitalizeFirstLetter(value))}
+                onChangeText={(value) =>
+                  setCity(capitalizeFirstLetter(value))
+                }
                 placeholder="Ort"
                 placeholderTextColor="#8A97A5"
                 autoCapitalize="words"
@@ -171,7 +146,8 @@ export default function NeedsHelpScreen() {
         <View style={styles.bottom}>
           <PrimaryButton
             title="Fortsätt"
-            //disabled={!isComplete}
+            // Restore validation after testing:
+            // disabled={!isComplete}
             onPress={handleContinue}
           />
         </View>

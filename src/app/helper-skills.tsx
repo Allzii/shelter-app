@@ -11,12 +11,13 @@ import {
 import { useState } from "react";
 import {
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
@@ -26,7 +27,7 @@ const options: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "wheelchair", label: "Hjälpa någon med rullstol", icon: Accessibility },
   { id: "support", label: "Ge stöd under promenaden", icon: HandHelping },
   { id: "carry", label: "Bära lättare saker", icon: Package },
-  { id: "car", label: "Jag har tillgång till bil", icon: Car },
+  { id: "car", label: "Skjutsa någon med bil", icon: Car },
 ];
 
 export default function HelperSkillsScreen() {
@@ -83,7 +84,7 @@ export default function HelperSkillsScreen() {
       <View style={styles.bottom}>
         <PrimaryButton
           title="Fortsätt"
-          disabled={selected.length === 0}
+          //disabled={selected.length === 0}
           onPress={() => router.push("/helper-permissions")}
         />
       </View>
@@ -122,6 +123,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
+    paddingVertical: 14,
     borderWidth: 1,
     borderColor: "#D5DEE5",
     borderRadius: 14,

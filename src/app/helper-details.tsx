@@ -5,44 +5,36 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import FormInput from "@/components/ui/FormInput";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
+import {
+  capitalizeFirstLetter,
+  formatPhoneNumber,
+} from "@/components/formatters";
 
 export default function HelperDetailsScreen() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
 
-  const capitalizeWords = (value: string) =>
-    value
-      .toLowerCase()
-      .replace(/(^|[\s-])\p{L}/gu, (letter) => letter.toUpperCase());
-
-  const formatPhoneNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, "").slice(0, 10);
-
-    if (numbers.length <= 3) return numbers;
-    if (numbers.length <= 6) {
-      return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
-    }
-    if (numbers.length <= 8) {
-      return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)} ${numbers.slice(6)}`;
-    }
-
-    return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)} ${numbers.slice(6, 8)} ${numbers.slice(8, 10)}`;
-  };
-
-  const isComplete = Boolean(firstName.trim() && lastName.trim() && phone.length >= 12);
+  const isComplete = Boolean(
+    firstName.trim() &&
+      lastName.trim() &&
+      phone.replace(/\D/g, "").length === 10
+  );
 
   const continueRegistration = () => {
+    // Restore validation after testing:
+    // if (!isComplete) return;
+
     Keyboard.dismiss();
     router.push("/helper-skills");
   };
@@ -54,13 +46,16 @@ export default function HelperDetailsScreen() {
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={10}
       >
         <ScrollView
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
         >
           <Text style={styles.title}>Om dig</Text>
+
           <Text style={styles.description}>
             Uppgifterna visas för personen du hjälper.
           </Text>
@@ -69,20 +64,26 @@ export default function HelperDetailsScreen() {
             label="Förnamn"
             icon={User}
             value={firstName}
-            onChangeText={(value) => setFirstName(capitalizeWords(value))}
+            onChangeText={(value) =>
+              setFirstName(capitalizeFirstLetter(value))
+            }
             placeholder="Skriv ditt förnamn"
             autoCapitalize="words"
             autoComplete="given-name"
           />
+
           <FormInput
             label="Efternamn"
             icon={User}
             value={lastName}
-            onChangeText={(value) => setLastName(capitalizeWords(value))}
+            onChangeText={(value) =>
+              setLastName(capitalizeFirstLetter(value))
+            }
             placeholder="Skriv ditt efternamn"
             autoCapitalize="words"
             autoComplete="family-name"
           />
+
           <FormInput
             label="Telefonnummer"
             icon={Phone}
@@ -98,7 +99,8 @@ export default function HelperDetailsScreen() {
         <View style={styles.bottom}>
           <PrimaryButton
             title="Fortsätt"
-            disabled={!isComplete}
+            // Restore validation after testing:
+            // disabled={!isComplete}
             onPress={continueRegistration}
           />
         </View>
@@ -112,21 +114,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#EEF4F7",
   },
+
   keyboardView: {
     flex: 1,
   },
+
   content: {
     flexGrow: 1,
     paddingHorizontal: 28,
     paddingTop: 32,
     paddingBottom: 24,
   },
+
   title: {
     fontSize: 31,
     lineHeight: 39,
     fontWeight: "700",
     color: "#142235",
   },
+
   description: {
     marginTop: 8,
     marginBottom: 4,
@@ -134,6 +140,7 @@ const styles = StyleSheet.create({
     lineHeight: 23,
     color: "#607080",
   },
+
   bottom: {
     paddingHorizontal: 28,
     paddingTop: 12,

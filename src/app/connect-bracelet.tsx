@@ -3,12 +3,12 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Bluetooth, Check, ChevronRight } from "lucide-react-native";
 
 import ScreenHeader from "@/components/ui/ScreenHeader";
@@ -16,35 +16,30 @@ import ScreenHeader from "@/components/ui/ScreenHeader";
 type ConnectionState = "idle" | "searching" | "connected";
 
 export default function ConnectBraceletScreen() {
-  const [connectionState, setConnectionState] = useState<ConnectionState>("idle");
-  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [connectionState, setConnectionState] =
+    useState<ConnectionState>("idle");
+
+  const searchTimer =
+    useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
-      if (searchTimer.current) {
+      if (searchTimer.current !== null) {
         clearTimeout(searchTimer.current);
+        searchTimer.current = null;
       }
     };
   }, []);
 
   const handleConnect = () => {
-    if (connectionState === "connected") {
-      Alert.alert("Armbandet är anslutet", "TryggNära-armbandet är redo att användas.");
-      return;
-    }
+    if (searchTimer.current !== null) return;
 
     setConnectionState("searching");
-    searchTimer.current = setTimeout(() => {
-      setConnectionState("connected");
-      searchTimer.current = null;
-    }, 1400);
-  };
 
-  const handleSkip = () => {
-    Alert.alert(
-      "Koppla senare",
-      "Du kan ansluta armbandet senare under Inställningar."
-    );
+    searchTimer.current = setTimeout(() => {
+      searchTimer.current = null;
+      setConnectionState("connected");
+    }, 1400);
   };
 
   const isSearching = connectionState === "searching";
@@ -55,10 +50,12 @@ export default function ConnectBraceletScreen() {
       <ScreenHeader step="Steg 5 av 5" />
 
       <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.title}>Koppla armbandet</Text>
+
         <Text style={styles.description}>
           Armbandet behöver vara nära telefonen när du ansluter det.
         </Text>
@@ -67,10 +64,12 @@ export default function ConnectBraceletScreen() {
 
         <View style={styles.steps}>
           <Instruction number="1" text="Slå på armbandet." />
+
           <Instruction
             number="2"
             text="Håll knappen intryckt tills lampan blinkar."
           />
+
           <Instruction
             number="3"
             text="Tryck på Sök efter armband."
@@ -78,8 +77,16 @@ export default function ConnectBraceletScreen() {
           />
         </View>
 
-        <View style={styles.statusRow} accessibilityLiveRegion="polite">
-          <View style={[styles.statusIcon, isConnected && styles.statusIconConnected]}>
+        <View
+          style={styles.statusRow}
+          accessibilityLiveRegion="polite"
+        >
+          <View
+            style={[
+              styles.statusIcon,
+              isConnected && styles.statusIconConnected,
+            ]}
+          >
             {isConnected ? (
               <Check size={21} color="#FFFFFF" strokeWidth={3} />
             ) : (
@@ -95,12 +102,13 @@ export default function ConnectBraceletScreen() {
                   ? "TryggNära-armband anslutet"
                   : "Inget armband anslutet"}
             </Text>
+
             <Text style={styles.statusDescription}>
               {isSearching
                 ? "Håll armbandet nära telefonen"
                 : isConnected
                   ? "Anslutningen fungerar"
-                  : "Bluetooth används bara vid anslutningen"}
+                  : "Sök efter ditt TryggNära-armband"}
             </Text>
           </View>
         </View>
@@ -109,6 +117,17 @@ export default function ConnectBraceletScreen() {
       <View style={styles.bottom}>
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={
+            isSearching
+              ? "Söker efter armband"
+              : isConnected
+                ? "Klart"
+                : "Sök efter armband"
+          }
+          accessibilityState={{
+            disabled: isSearching,
+            busy: isSearching,
+          }}
           disabled={isSearching}
           onPress={handleConnect}
           style={({ pressed }) => [
@@ -125,27 +144,23 @@ export default function ConnectBraceletScreen() {
               <Text style={styles.primaryButtonText}>
                 {isConnected ? "Klart" : "Sök efter armband"}
               </Text>
+
               {isConnected ? (
-                <Check size={22} color="#FFFFFF" style={styles.buttonIcon} />
+                <Check
+                  size={22}
+                  color="#FFFFFF"
+                  style={styles.buttonIcon}
+                />
               ) : (
-                <ChevronRight size={22} color="#FFFFFF" style={styles.buttonIcon} />
+                <ChevronRight
+                  size={22}
+                  color="#FFFFFF"
+                  style={styles.buttonIcon}
+                />
               )}
             </>
           )}
         </Pressable>
-
-        {!isConnected && (
-          <Pressable
-            accessibilityRole="button"
-            onPress={handleSkip}
-            style={({ pressed }) => [
-              styles.skipButton,
-              pressed && styles.skipButtonPressed,
-            ]}
-          >
-            <Text style={styles.skipButtonText}>Hoppa över tills vidare</Text>
-          </Pressable>
-        )}
       </View>
     </SafeAreaView>
   );
@@ -157,12 +172,17 @@ type InstructionProps = {
   isLast?: boolean;
 };
 
-function Instruction({ number, text, isLast = false }: InstructionProps) {
+function Instruction({
+  number,
+  text,
+  isLast = false,
+}: InstructionProps) {
   return (
     <View style={[styles.stepRow, isLast && styles.lastStepRow]}>
       <View style={styles.stepNumber}>
         <Text style={styles.stepNumberText}>{number}</Text>
       </View>
+
       <Text style={styles.stepText}>{text}</Text>
     </View>
   );
@@ -172,6 +192,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#EEF4F7",
+  },
+
+  scrollView: {
+    flex: 1,
   },
 
   content: {
@@ -210,6 +234,7 @@ const styles = StyleSheet.create({
 
   stepRow: {
     minHeight: 58,
+    paddingVertical: 10,
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
@@ -289,7 +314,9 @@ const styles = StyleSheet.create({
 
   primaryButton: {
     width: "100%",
-    height: 58,
+    minHeight: 58,
+    paddingHorizontal: 48,
+    paddingVertical: 16,
     borderRadius: 14,
     backgroundColor: "#2F6591",
     alignItems: "center",
@@ -309,6 +336,7 @@ const styles = StyleSheet.create({
   },
 
   primaryButtonText: {
+    textAlign: "center",
     color: "#FFFFFF",
     fontSize: 18,
     fontWeight: "700",
@@ -317,21 +345,5 @@ const styles = StyleSheet.create({
   buttonIcon: {
     position: "absolute",
     right: 22,
-  },
-
-  skipButton: {
-    minHeight: 46,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  skipButtonPressed: {
-    opacity: 0.6,
-  },
-
-  skipButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#315D7E",
   },
 });

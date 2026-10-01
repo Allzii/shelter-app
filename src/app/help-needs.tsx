@@ -8,9 +8,10 @@ import {
   Minus,
   Plus,
 } from "lucide-react-native";
-
 import {
-  SafeAreaView,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -19,6 +20,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import HelpOption from "@/components/ui/HelpOption";
 import PrimaryButton from "@/components/ui/PrimaryButton";
@@ -31,16 +33,15 @@ export default function HelpNeedsScreen() {
   const [hasElevator, setHasElevator] = useState(false);
 
   const toggleNeed = (need: string) => {
-    if (selectedNeeds.includes(need)) {
-      setSelectedNeeds(
-        selectedNeeds.filter((item) => item !== need)
-      );
-    } else {
-      setSelectedNeeds([...selectedNeeds, need]);
-    }
+    setSelectedNeeds((previous) =>
+      previous.includes(need)
+        ? previous.filter((item) => item !== need)
+        : [...previous, need]
+    );
   };
 
   const handleContinue = () => {
+    Keyboard.dismiss();
     router.push("/needs-help-permissions");
   };
 
@@ -48,151 +49,164 @@ export default function HelpNeedsScreen() {
     <SafeAreaView style={styles.container}>
       <ScreenHeader step="Steg 3 av 5" />
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="interactive"
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={10}
       >
-        <Text style={styles.title}>
-          Vilken hjälp kan du behöva?
-        </Text>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+        >
+          <Text style={styles.title}>
+            Vilken hjälp kan du behöva?
+          </Text>
 
-        <Text style={styles.description}>
-          Välj alla alternativ som passar dig. Din hjälpare får se detta
-          innan ni möts.
-        </Text>
+          <Text style={styles.description}>
+            Välj alla alternativ som passar dig. Din hjälpare får se detta
+            innan ni möts.
+          </Text>
 
-        <View style={styles.options}>
-          <HelpOption
-            title="Rullstol"
-            description="Jag använder rullstol och kan behöva hjälp att ta mig fram."
-            icon={Accessibility}
-            selected={selectedNeeds.includes("wheelchair")}
-            onPress={() => toggleNeed("wheelchair")}
-          />
+          <View style={styles.options}>
+            <HelpOption
+              title="Rullstol"
+              description="Jag använder rullstol och kan behöva hjälp att ta mig fram."
+              icon={Accessibility}
+              selected={selectedNeeds.includes("wheelchair")}
+              onPress={() => toggleNeed("wheelchair")}
+            />
 
-          <HelpOption
-            title="Svårt att gå längre sträckor"
-            description="Jag går långsamt, använder gånghjälpmedel eller behöver ta pauser."
-            icon={Footprints}
-            selected={selectedNeeds.includes("walking")}
-            onPress={() => toggleNeed("walking")}
-          />
+            <HelpOption
+              title="Svårt att gå längre sträckor"
+              description="Jag går långsamt, använder gånghjälpmedel eller behöver ta pauser."
+              icon={Footprints}
+              selected={selectedNeeds.includes("walking")}
+              onPress={() => toggleNeed("walking")}
+            />
 
-          <HelpOption
-            title="Hjälp i trappor"
-            description="Jag har svårt att ta mig upp eller ner för trappor."
-            icon={MoveUp}
-            selected={selectedNeeds.includes("stairs")}
-            onPress={() => toggleNeed("stairs")}
-          />
+            <HelpOption
+              title="Hjälp i trappor"
+              description="Jag har svårt att ta mig upp eller ner för trappor."
+              icon={MoveUp}
+              selected={selectedNeeds.includes("stairs")}
+              onPress={() => toggleNeed("stairs")}
+            />
 
-          <HelpOption
-            title="Fysiskt stöd"
-            description="Jag kan behöva stöd av en annan person när jag går."
-            icon={PersonStanding}
-            selected={selectedNeeds.includes("physical-support")}
-            onPress={() => toggleNeed("physical-support")}
-          />
-        </View>
+            <HelpOption
+              title="Fysiskt stöd"
+              description="Jag kan behöva stöd av en annan person när jag går."
+              icon={PersonStanding}
+              selected={selectedNeeds.includes("physical-support")}
+              onPress={() => toggleNeed("physical-support")}
+            />
+          </View>
 
-        <View style={styles.extraSection}>
-          <Text style={styles.sectionTitle}>Ditt boende</Text>
+          <View style={styles.extraSection}>
+            <Text style={styles.sectionTitle}>Ditt boende</Text>
 
-          <View style={styles.homeCard}>
-            <View style={styles.homeRow}>
-              <View style={styles.homeDetails}>
-                <Text style={styles.homeLabel}>Våningsplan</Text>
-                <Text style={styles.homeDescription}>
-                  {floor === 0 ? "0 = entréplan" : "Vilken våning bor du på?"}
-                </Text>
+            <View style={styles.homeCard}>
+              <View style={styles.homeRow}>
+                <View style={styles.homeDetails}>
+                  <Text style={styles.homeLabel}>Våningsplan</Text>
+                  <Text style={styles.homeDescription}>
+                    0 = entréplan
+                  </Text>
+                </View>
+
+                <View style={styles.floorControls}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Minska våningsplan"
+                    accessibilityState={{ disabled: floor === 0 }}
+                    disabled={floor === 0}
+                    onPress={() =>
+                      setFloor((value) => Math.max(0, value - 1))
+                    }
+                    style={({ pressed }) => [
+                      styles.floorButton,
+                      floor === 0 && styles.disabled,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    <Minus size={22} color="#142235" />
+                  </Pressable>
+
+                  <Text
+                    style={styles.floorValue}
+                    accessibilityLabel={`Våningsplan ${floor}`}
+                    accessibilityLiveRegion="polite"
+                  >
+                    {floor}
+                  </Text>
+
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Öka våningsplan"
+                    onPress={() => setFloor((value) => value + 1)}
+                    style={({ pressed }) => [
+                      styles.floorButton,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    <Plus size={22} color="#142235" />
+                  </Pressable>
+                </View>
               </View>
 
-              <View style={styles.floorControls}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Minska våningsplan"
-                  accessibilityState={{ disabled: floor === 0 }}
-                  disabled={floor === 0}
-                  onPress={() => setFloor((value) => Math.max(0, value - 1))}
-                  style={({ pressed }) => [
-                    styles.floorButton,
-                    floor === 0 && styles.disabled,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <Minus size={22} color="#142235" />
-                </Pressable>
-                <Text
-                  style={styles.floorValue}
-                  accessibilityLabel={`Våningsplan ${floor}`}
-                  accessibilityLiveRegion="polite"
-                >
-                  {floor}
-                </Text>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Öka våningsplan"
-                  onPress={() => setFloor((value) => value + 1)}
-                  style={({ pressed }) => [
-                    styles.floorButton,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <Plus size={22} color="#142235" />
-                </Pressable>
-              </View>
-            </View>
+              <View style={[styles.homeRow, styles.elevatorRow]}>
+                <View style={styles.homeDetails}>
+                  <Text style={styles.homeLabel}>Hiss i byggnaden</Text>
+                  <Text style={styles.homeDescription}>
+                    {hasElevator ? "Hiss finns" : "Ingen hiss"}
+                  </Text>
+                </View>
 
-            <View style={[styles.homeRow, styles.elevatorRow]}>
-              <View style={styles.homeDetails}>
-                <Text style={styles.homeLabel}>Hiss i byggnaden</Text>
-                <Text style={styles.homeDescription}>
-                  {hasElevator ? "Hiss finns" : "Ingen hiss"}
-                </Text>
+                <Switch
+                  accessibilityLabel="Hiss i byggnaden"
+                  value={hasElevator}
+                  onValueChange={setHasElevator}
+                  trackColor={{ false: "#C5D0DA", true: "#2F6591" }}
+                  thumbColor="#FFFFFF"
+                  ios_backgroundColor="#C5D0DA"
+                />
               </View>
-              <Switch
-                accessibilityLabel="Hiss i byggnaden"
-                value={hasElevator}
-                onValueChange={setHasElevator}
-                trackColor={{ false: "#C5D0DA", true: "#2F6591" }}
-                thumbColor="#FFFFFF"
-                ios_backgroundColor="#C5D0DA"
-              />
             </View>
           </View>
-        </View>
 
-        <View style={styles.extraSection}>
-          <Text style={styles.extraLabel}>
-            Något annat din hjälpare bör veta?
-          </Text>
+          <View style={styles.extraSection}>
+            <Text style={styles.extraLabel}>
+              Något annat din hjälpare bör veta?
+            </Text>
 
-          <Text style={styles.optionalText}>
-            Valfritt
-          </Text>
+            <Text style={styles.optionalText}>Valfritt</Text>
 
-          <TextInput
-            style={styles.extraInput}
-            value={additionalInfo}
-            onChangeText={setAdditionalInfo}
-            placeholder="Skriv här..."
-            placeholderTextColor="#8A97A5"
-            multiline
-            textAlignVertical="top"
-            maxLength={300}
-            accessibilityLabel="Något annat din hjälpare bör veta? Valfritt"
+            <TextInput
+              style={styles.extraInput}
+              value={additionalInfo}
+              onChangeText={setAdditionalInfo}
+              placeholder="Skriv här..."
+              placeholderTextColor="#8A97A5"
+              multiline
+              textAlignVertical="top"
+              maxLength={300}
+              accessibilityLabel="Något annat din hjälpare bör veta? Valfritt"
+            />
+
+            <Text style={styles.characterCount}>
+              {additionalInfo.length}/300
+            </Text>
+          </View>
+        </ScrollView>
+
+        <View style={styles.bottom}>
+          <PrimaryButton
+            title="Fortsätt"
+            onPress={handleContinue}
           />
         </View>
-      </ScrollView>
-
-      <View style={styles.bottom}>
-        <PrimaryButton
-          title="Fortsätt"
-          onPress={handleContinue}
-        />
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -201,6 +215,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#EEF4F7",
+  },
+
+  keyboardView: {
+    flex: 1,
   },
 
   content: {
@@ -343,6 +361,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
     color: "#142235",
+  },
+
+  characterCount: {
+    marginTop: 6,
+    textAlign: "right",
+    fontSize: 13,
+    color: "#7A8896",
   },
 
   bottom: {

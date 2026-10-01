@@ -16,12 +16,17 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import FormInput from "@/components/ui/FormInput";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
+import {
+  capitalizeFirstLetter,
+  formatPhoneNumber,
+} from "@/components/formatters";
 
 const relations = [
   "Partner",
   "Förälder",
   "Barn",
   "Syskon",
+  "Annan släkting",
   "Vän",
   "Granne",
   "Annat",
@@ -34,31 +39,6 @@ export default function EmergencyContactScreen() {
   const [otherRelation, setOtherRelation] = useState("");
   const [phone, setPhone] = useState("");
   const [showRelations, setShowRelations] = useState(false);
-
-  const capitalizeFirstLetter = (value: string) => {
-    return value.replace(/^\s*\S/, (match) => match.toUpperCase());
-  };
-
-  const formatPhoneNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, "").slice(0, 10);
-
-    if (numbers.length <= 3) {
-      return numbers;
-    }
-
-    if (numbers.length <= 6) {
-      return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
-    }
-
-    if (numbers.length <= 8) {
-      return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)} ${numbers.slice(6)}`;
-    }
-
-    return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)} ${numbers.slice(
-      6,
-      8
-    )} ${numbers.slice(8, 10)}`;
-  };
 
   const selectRelation = (selectedRelation: string) => {
     setRelation(selectedRelation);
