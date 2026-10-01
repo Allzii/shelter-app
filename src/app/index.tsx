@@ -1,15 +1,8 @@
-import {
-  Image,
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 
-import { ChevronRight } from "lucide-react-native";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 
 export default function StartScreen() {
   const handleGetStarted = () => {
@@ -17,112 +10,109 @@ export default function StartScreen() {
   };
 
   const handleAbout = () => {
-    //lägg till sen
+    // TODO: Add information about TryggNära.
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.backgroundShapes} pointerEvents="none">
         <View style={styles.circleTop} />
         <View style={styles.circleRight} />
         <View style={styles.circleBottom} />
       </View>
-      <View style={styles.main}>
-        <Image
-          source={require("../../assets/images/tryggnara.png")}
-          style={styles.logo}
-        />
 
-        <Text style={styles.brand}>TryggNära</Text>
-
-        <Text style={styles.title}>
-          Du behöver inte{"\n"}gå ensam
-        </Text>
-
-        <Text style={styles.description}>
-          Trygg hjälp från människor i din närhet när det behövs.
-        </Text>
-      </View>
-
-      <View style={styles.bottom}>
-        <Pressable
-          onPress={handleGetStarted}
-          style={({ pressed }) => [
-            styles.primaryButton,
-            pressed && styles.buttonPressed,
-          ]}
-        >
-          <Text style={styles.primaryButtonText}>Kom igång</Text>
-          <ChevronRight
-            size={22}
-            color="#FFFFFF"
-            style={styles.arrow}
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.main}>
+          <Image
+            source={require("../../assets/images/tryggnara.png")}
+            style={styles.logo}
           />
-        </Pressable>
 
-        <Pressable
-          onPress={handleAbout}
-          style={({ pressed }) => [
-            styles.aboutButton,
-            pressed && styles.aboutPressed,
-          ]}
-        >
-          <Text style={styles.aboutText}>Så fungerar TryggNära</Text>
-        </Pressable>
-      </View>
-    </SafeAreaView>
+          <Text style={styles.brand} maxFontSizeMultiplier={1.3}>
+            TryggNära
+          </Text>
+
+          <Text style={styles.title} maxFontSizeMultiplier={1.3}>
+            Du behöver inte{"\n"}gå ensam
+          </Text>
+
+          <Text style={styles.description} maxFontSizeMultiplier={1.3}>
+            Trygg hjälp från människor i din närhet när det behövs.
+          </Text>
+        </View>
+
+        <View style={styles.bottom}>
+          <PrimaryButton
+            title="Kom igång"
+            onPress={handleGetStarted}
+          />
+
+          <Pressable
+            onPress={handleAbout}
+            accessibilityRole="button"
+            accessibilityLabel="Så fungerar TryggNära"
+            style={({ pressed }) => [
+              styles.aboutButton,
+              pressed && styles.aboutPressed,
+            ]}
+          >
+            <Text style={styles.aboutText} maxFontSizeMultiplier={1.3}>
+              Så fungerar TryggNära
+            </Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#EEF4F7",
+  },
 
+  safeArea: {
+    flex: 1,
+    paddingHorizontal: 28,
+  },
 
   backgroundShapes: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
+    ...StyleSheet.absoluteFill,
     overflow: "hidden",
   },
 
   circleTop: {
     position: "absolute",
-    width: 260,
-    height: 260,
-    borderRadius: 130,
+    width: "68%",
+    aspectRatio: 1,
+    borderRadius: 9999,
     backgroundColor: "#A8C8DE",
-    top: -130,
-    left: -100,
-    opacity: 0.75,
+    top: "-18%",
+    left: "-26%",
+    opacity: 0.6,
   },
 
   circleRight: {
     position: "absolute",
-    width: 180,
-    height: 180,
-    borderRadius: 90,
+    width: "47%",
+    aspectRatio: 1,
+    borderRadius: 9999,
     backgroundColor: "#5687AE",
-    top: 190,
-    right: -120,
-    opacity: 0.45,
+    top: "22%",
+    right: "-32%",
+    opacity: 0.3,
   },
 
   circleBottom: {
     position: "absolute",
-    width: 300,
-    height: 300,
-    borderRadius: 150,
+    width: "78%",
+    aspectRatio: 1,
+    borderRadius: 9999,
     backgroundColor: "#254F75",
-    bottom: -210,
-    left: -80,
-    opacity: 0.4,
-  },
-
-  container: {
-    flex: 1,
-    backgroundColor: "#EEF4F7",
-    paddingHorizontal: 28,
+    bottom: "-24%",
+    left: "-22%",
+    opacity: 0.25,
   },
 
   main: {
@@ -140,9 +130,8 @@ const styles = StyleSheet.create({
   },
 
   brand: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: "700",
-
     color: "#236C78",
     marginBottom: 18,
   },
@@ -161,39 +150,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 18,
     lineHeight: 27,
-    color: "#536476",
+    color: "#43535F",
   },
 
   bottom: {
     width: "100%",
     alignItems: "center",
     paddingBottom: 28,
-  },
-
-  primaryButton: {
-    width: "94%",
-    height: 58,
-    borderRadius: 13,
-    backgroundColor: "#2F6591",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 22,
-  },
-
-  buttonPressed: {
-    opacity: 0.82,
-  },
-
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontWeight: "700",
-  },
-
-  arrow: {
-    position: "absolute",
-    right: 22,
   },
 
   aboutButton: {

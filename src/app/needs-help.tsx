@@ -1,18 +1,17 @@
 import { router } from "expo-router";
 import { MapPin, Phone, User } from "lucide-react-native";
 import { useState } from "react";
-
 import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import FormInput from "@/components/ui/FormInput";
 import PrimaryButton from "@/components/ui/PrimaryButton";
@@ -26,10 +25,8 @@ export default function NeedsHelpScreen() {
   const [postalCode, setPostalCode] = useState("");
   const [city, setCity] = useState("");
 
-  const capitalizeWords = (value: string) => {
-    return value
-      .toLowerCase()
-      .replace(/(^|[\s-])\p{L}/gu, (letter) => letter.toUpperCase());
+  const capitalizeFirstLetter = (value: string) => {
+    return value.replace(/^\s*\S/, (match) => match.toUpperCase());
   };
 
   const formatPhoneNumber = (value: string) => {
@@ -65,21 +62,23 @@ export default function NeedsHelpScreen() {
 
   const isComplete = Boolean(
     firstName.trim() &&
-      lastName.trim() &&
-      phone.replace(/\D/g, "").length === 10 &&
-      street.trim() &&
-      postalCode.replace(/\D/g, "").length === 5 &&
-      city.trim()
+    lastName.trim() &&
+    phone.replace(/\D/g, "").length === 10 &&
+    street.trim() &&
+    postalCode.replace(/\D/g, "").length === 5 &&
+    city.trim()
   );
 
   const handleContinue = () => {
+    //if (!isComplete) return;
+
     Keyboard.dismiss();
-    router.push("/emergency-contact")
+    router.push("/emergency-contact");
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScreenHeader step="Steg 1 av 4" />
+      <ScreenHeader step="Steg 1 av 5" />
 
       <KeyboardAvoidingView
         style={styles.keyboardView}
@@ -94,16 +93,14 @@ export default function NeedsHelpScreen() {
         >
           <Text style={styles.title}>Om dig</Text>
 
-          <Text style={styles.description}>
-            Fyll i dina uppgifter.
-          </Text>
+          <Text style={styles.description}>Fyll i dina uppgifter.</Text>
 
           <FormInput
             label="Förnamn"
             icon={User}
             value={firstName}
             onChangeText={(value) =>
-              setFirstName(capitalizeWords(value))
+              setFirstName(capitalizeFirstLetter(value))
             }
             placeholder="Skriv ditt förnamn"
             autoCapitalize="words"
@@ -115,7 +112,7 @@ export default function NeedsHelpScreen() {
             icon={User}
             value={lastName}
             onChangeText={(value) =>
-              setLastName(capitalizeWords(value))
+              setLastName(capitalizeFirstLetter(value))
             }
             placeholder="Skriv ditt efternamn"
             autoCapitalize="words"
@@ -126,9 +123,7 @@ export default function NeedsHelpScreen() {
             label="Telefonnummer"
             icon={Phone}
             value={phone}
-            onChangeText={(value) =>
-              setPhone(formatPhoneNumber(value))
-            }
+            onChangeText={(value) => setPhone(formatPhoneNumber(value))}
             placeholder="070-123 45 67"
             keyboardType="phone-pad"
             autoComplete="tel"
@@ -139,7 +134,7 @@ export default function NeedsHelpScreen() {
             label="Adress"
             icon={MapPin}
             value={street}
-            onChangeText={setStreet}
+            onChangeText={(value) => setStreet(capitalizeFirstLetter(value))}
             placeholder="Gata och nummer"
             autoCapitalize="words"
             autoComplete="street-address"
@@ -164,9 +159,7 @@ export default function NeedsHelpScreen() {
               <TextInput
                 style={styles.smallInput}
                 value={city}
-                onChangeText={(value) =>
-                  setCity(capitalizeWords(value))
-                }
+                onChangeText={(value) => setCity(capitalizeFirstLetter(value))}
                 placeholder="Ort"
                 placeholderTextColor="#8A97A5"
                 autoCapitalize="words"
@@ -178,7 +171,7 @@ export default function NeedsHelpScreen() {
         <View style={styles.bottom}>
           <PrimaryButton
             title="Fortsätt"
-            disabled={!isComplete}
+            //disabled={!isComplete}
             onPress={handleContinue}
           />
         </View>

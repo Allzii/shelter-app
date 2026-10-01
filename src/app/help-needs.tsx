@@ -41,12 +41,12 @@ export default function HelpNeedsScreen() {
   };
 
   const handleContinue = () => {
-    router.push("/connect-bracelet");
+    router.push("/needs-help-permissions");
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScreenHeader step="Steg 3 av 4" />
+      <ScreenHeader step="Steg 3 av 5" />
 
       <ScrollView
         contentContainerStyle={styles.content}

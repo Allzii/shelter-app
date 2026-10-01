@@ -40,7 +40,7 @@ export default function PrimaryButton({
 const styles = StyleSheet.create({
   button: {
     width: "100%",
-    height: 58,
+    minHeight: 58,
     borderRadius: 14,
     backgroundColor: "#2F6591",
     alignItems: "center",

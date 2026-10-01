@@ -1,23 +1,17 @@
 import { router } from "expo-router";
-import {
-  ChevronDown,
-  Phone,
-  User,
-  Users,
-} from "lucide-react-native";
+import { Check, ChevronDown, Phone, User, Users } from "lucide-react-native";
 import { useState } from "react";
-
 import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import FormInput from "@/components/ui/FormInput";
 import PrimaryButton from "@/components/ui/PrimaryButton";
@@ -28,7 +22,6 @@ const relations = [
   "Förälder",
   "Barn",
   "Syskon",
-  "Annan släkting",
   "Vän",
   "Granne",
   "Annat",
@@ -40,13 +33,10 @@ export default function EmergencyContactScreen() {
   const [relation, setRelation] = useState("");
   const [otherRelation, setOtherRelation] = useState("");
   const [phone, setPhone] = useState("");
-
   const [showRelations, setShowRelations] = useState(false);
 
-  const capitalizeWords = (value: string) => {
-    return value
-      .toLowerCase()
-      .replace(/(^|[\s-])\p{L}/gu, (letter) => letter.toUpperCase());
+  const capitalizeFirstLetter = (value: string) => {
+    return value.replace(/^\s*\S/, (match) => match.toUpperCase());
   };
 
   const formatPhoneNumber = (value: string) => {
@@ -88,13 +78,17 @@ export default function EmergencyContactScreen() {
   );
 
   const handleContinue = () => {
+    // Restore validation after testing:
+    // if (!isComplete) return;
+
     Keyboard.dismiss();
+    setShowRelations(false);
     router.push("/help-needs");
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScreenHeader step="Steg 2 av 4" />
+      <ScreenHeader step="Steg 2 av 5" />
 
       <KeyboardAvoidingView
         style={styles.keyboardView}
@@ -119,11 +113,11 @@ export default function EmergencyContactScreen() {
             icon={User}
             value={firstName}
             onChangeText={(value) =>
-              setFirstName(capitalizeWords(value))
+              setFirstName(capitalizeFirstLetter(value))
             }
             placeholder="Skriv personens förnamn"
             autoCapitalize="words"
-            autoComplete="given-name"
+            autoComplete="off"
           />
 
           <FormInput
@@ -131,22 +125,24 @@ export default function EmergencyContactScreen() {
             icon={User}
             value={lastName}
             onChangeText={(value) =>
-              setLastName(capitalizeWords(value))
+              setLastName(capitalizeFirstLetter(value))
             }
             placeholder="Skriv personens efternamn"
             autoCapitalize="words"
-            autoComplete="family-name"
+            autoComplete="off"
           />
 
-          {/* Relation */}
           <View style={styles.relationWrapper}>
             <Text style={styles.label}>Relation</Text>
 
             <Pressable
               onPress={() => {
                 Keyboard.dismiss();
-                setShowRelations(!showRelations);
+                setShowRelations((previous) => !previous);
               }}
+              accessibilityRole="button"
+              accessibilityLabel={`Relation: ${relation || "Välj relation"}`}
+              accessibilityState={{ expanded: showRelations }}
               style={({ pressed }) => [
                 styles.relationButton,
                 pressed && styles.pressed,
@@ -168,17 +164,12 @@ export default function EmergencyContactScreen() {
                 color="#607080"
                 style={{
                   transform: [
-                    {
-                      rotate: showRelations
-                        ? "180deg"
-                        : "0deg",
-                    },
+                    { rotate: showRelations ? "180deg" : "0deg" },
                   ],
                 }}
               />
             </Pressable>
 
-            {/* Scrollable dropdown */}
             {showRelations && (
               <View style={styles.dropdown}>
                 <ScrollView
@@ -190,14 +181,26 @@ export default function EmergencyContactScreen() {
                     <Pressable
                       key={item}
                       onPress={() => selectRelation(item)}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: relation === item }}
                       style={({ pressed }) => [
                         styles.dropdownOption,
+                        relation === item && styles.dropdownSelected,
                         pressed && styles.dropdownPressed,
                       ]}
                     >
-                      <Text style={styles.dropdownText}>
+                      <Text
+                        style={[
+                          styles.dropdownText,
+                          relation === item && styles.dropdownSelectedText,
+                        ]}
+                      >
                         {item}
                       </Text>
+
+                      {relation === item && (
+                        <Check size={20} color="#2F6591" />
+                      )}
                     </Pressable>
                   ))}
                 </ScrollView>
@@ -205,14 +208,13 @@ export default function EmergencyContactScreen() {
             )}
           </View>
 
-          {/* Only shown when "Annat" is selected */}
           {relation === "Annat" && (
             <FormInput
               label="Ange relation"
               icon={Users}
               value={otherRelation}
               onChangeText={(value) =>
-                setOtherRelation(capitalizeWords(value))
+                setOtherRelation(capitalizeFirstLetter(value))
               }
               placeholder="Skriv relation"
               autoCapitalize="words"
@@ -223,12 +225,10 @@ export default function EmergencyContactScreen() {
             label="Telefonnummer"
             icon={Phone}
             value={phone}
-            onChangeText={(value) =>
-              setPhone(formatPhoneNumber(value))
-            }
+            onChangeText={(value) => setPhone(formatPhoneNumber(value))}
             placeholder="070-123 45 67"
             keyboardType="phone-pad"
-            autoComplete="tel"
+            autoComplete="off"
             maxLength={13}
           />
 
@@ -241,7 +241,8 @@ export default function EmergencyContactScreen() {
         <View style={styles.bottom}>
           <PrimaryButton
             title="Fortsätt"
-            disabled={!isComplete}
+            // Restore validation after testing:
+            // disabled={!isComplete}
             onPress={handleContinue}
           />
         </View>
@@ -320,27 +321,24 @@ const styles = StyleSheet.create({
     top: 82,
     left: 0,
     right: 0,
-
     maxHeight: 230,
-
     backgroundColor: "#FFFFFF",
     borderRadius: 14,
     borderWidth: 1,
     borderColor: "#D5DEE5",
     overflow: "hidden",
     zIndex: 20,
-
     shadowColor: "#000000",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
   },
 
   dropdownOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 13,
     borderBottomWidth: 1,
@@ -350,6 +348,15 @@ const styles = StyleSheet.create({
   dropdownText: {
     fontSize: 16,
     color: "#142235",
+  },
+
+  dropdownSelected: {
+    backgroundColor: "#E8F0F7",
+  },
+
+  dropdownSelectedText: {
+    color: "#2F6591",
+    fontWeight: "600",
   },
 
   dropdownPressed: {

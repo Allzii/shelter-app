@@ -52,7 +52,7 @@ export default function ConnectBraceletScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScreenHeader step="Steg 4 av 4" />
+      <ScreenHeader step="Steg 5 av 5" />
 
       <ScrollView
         contentContainerStyle={styles.content}

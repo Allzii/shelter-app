@@ -1,5 +1,6 @@
 import * as Location from "expo-location";
 import * as Notifications from "expo-notifications";
+import { router } from "expo-router";
 import { AlertCircle, Bell, Check, MapPin } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
@@ -19,7 +20,7 @@ import ScreenHeader from "@/components/ui/ScreenHeader";
 
 type PermissionState = "idle" | "requesting" | "granted" | "denied";
 
-export default function HelperPermissionsScreen() {
+export default function NeedsHelpPermissionsScreen() {
   const [locationState, setLocationState] =
     useState<PermissionState>("idle");
   const [notificationState, setNotificationState] =
@@ -105,7 +106,7 @@ export default function HelperPermissionsScreen() {
       await Notifications.scheduleNotificationAsync({
         content: {
           title: "TryggNära",
-          body: "Notiser är aktiverade. Du kan nu få hjälpförfrågningar.",
+          body: "Notiser är aktiverade. Du får besked när en hjälpare svarar.",
           sound: "default",
         },
         trigger: null,
@@ -126,12 +127,13 @@ export default function HelperPermissionsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScreenHeader step="Steg 4 av 4" />
+      <ScreenHeader step="Steg 4 av 5" />
 
       <View style={styles.content}>
         <Text style={styles.title}>Notiser och position</Text>
         <Text style={styles.description}>
-          Detta behövs för att du ska kunna få hjälpförfrågningar i närheten.
+          Positionen skickas när du ber om hjälp. Notiser meddelar dig när en
+          hjälpare svarar.
         </Text>
 
         <View style={styles.settings}>
@@ -159,14 +161,9 @@ export default function HelperPermissionsScreen() {
 
       <View style={styles.bottom}>
         <PrimaryButton
-          title="Slutför registreringen"
+          title="Fortsätt"
           disabled={!isComplete}
-          onPress={() =>
-            Alert.alert(
-              "Registreringen är klar",
-              "Du är nu registrerad som hjälpare."
-            )
-          }
+          onPress={() => router.push("/connect-bracelet")}
         />
       </View>
     </SafeAreaView>
@@ -196,14 +193,14 @@ function getLocationDescription(state: PermissionState) {
   if (state === "requesting") return "Hämtar din position...";
   if (state === "denied") return "Position är inte tillåten";
   if (state === "granted") return "Position är aktiverad";
-  return "Används för att hitta förfrågningar nära dig";
+  return "Används när du skickar ett hjälplarm";
 }
 
 function getNotificationDescription(state: PermissionState) {
   if (state === "requesting") return "Aktiverar notiser...";
   if (state === "denied") return "Notiser är inte tillåtna";
   if (state === "granted") return "Notiser är aktiverade";
-  return "Meddelar dig när någon behöver hjälp";
+  return "Meddelar dig när en hjälpare svarar";
 }
 
 type PermissionRowProps = {
