@@ -14,21 +14,37 @@ type ScreenHeaderProps = {
 export default function ScreenHeader({
   step,
 }: ScreenHeaderProps) {
-  return (
-    <View style={styles.header}>
-      <Pressable
-        onPress={() => router.back()}
-        style={({ pressed }) => [
-          styles.backButton,
-          pressed && styles.pressed,
-        ]}
-      >
-        <ChevronLeft size={24} color="#2F6591" />
-        <Text style={styles.backText}>Tillbaka</Text>
-      </Pressable>
+  const currentStep = step ? Number(step.match(/\d+/)?.[0]) : 0;
+  const totalSteps = step ? Number(step.match(/\d+$/)?.[0]) : 0;
 
-      {step && (
-        <Text style={styles.stepText}>{step}</Text>
+  return (
+    <View>
+      <View style={styles.header}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Gå tillbaka"
+          onPress={() => router.back()}
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.pressed,
+          ]}
+        >
+          <ChevronLeft size={24} color="#2F6591" />
+          <Text style={styles.backText}>Tillbaka</Text>
+        </Pressable>
+
+        {step && <Text style={styles.stepText}>{step}</Text>}
+      </View>
+
+      {totalSteps > 0 && (
+        <View style={styles.progressTrack}>
+          <View
+            style={[
+              styles.progressValue,
+              { width: `${(currentStep / totalSteps) * 100}%` },
+            ]}
+          />
+        </View>
       )}
     </View>
   );
@@ -62,6 +78,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#607080",
+  },
+
+  progressTrack: {
+    height: 2,
+    backgroundColor: "#D5DEE5",
+  },
+
+  progressValue: {
+    height: 2,
+    backgroundColor: "#2F6591",
   },
 
   pressed: {

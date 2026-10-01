@@ -79,11 +79,17 @@ export default function EmergencyContactScreen() {
     }
   };
 
+  const isComplete = Boolean(
+    firstName.trim() &&
+      lastName.trim() &&
+      relation &&
+      (relation !== "Annat" || otherRelation.trim()) &&
+      phone.replace(/\D/g, "").length === 10
+  );
+
   const handleContinue = () => {
     Keyboard.dismiss();
-
-    // Step 3 will be added next.
-    // router.push("/help-needs");
+    router.push("/help-needs");
   };
 
   return (
@@ -235,6 +241,7 @@ export default function EmergencyContactScreen() {
         <View style={styles.bottom}>
           <PrimaryButton
             title="Fortsätt"
+            disabled={!isComplete}
             onPress={handleContinue}
           />
         </View>

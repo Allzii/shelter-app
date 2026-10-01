@@ -63,6 +63,15 @@ export default function NeedsHelpScreen() {
     return `${numbers.slice(0, 3)} ${numbers.slice(3)}`;
   };
 
+  const isComplete = Boolean(
+    firstName.trim() &&
+      lastName.trim() &&
+      phone.replace(/\D/g, "").length === 10 &&
+      street.trim() &&
+      postalCode.replace(/\D/g, "").length === 5 &&
+      city.trim()
+  );
+
   const handleContinue = () => {
     Keyboard.dismiss();
     router.push("/emergency-contact")
@@ -169,6 +178,7 @@ export default function NeedsHelpScreen() {
         <View style={styles.bottom}>
           <PrimaryButton
             title="Fortsätt"
+            disabled={!isComplete}
             onPress={handleContinue}
           />
         </View>

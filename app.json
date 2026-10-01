@@ -25,6 +25,13 @@
     },
     "plugins": [
       "expo-router",
+      "expo-notifications",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "TryggNära använder din position för att visa hjälpförfrågningar i närheten."
+        }
+      ],
       [
         "expo-splash-screen",
         {

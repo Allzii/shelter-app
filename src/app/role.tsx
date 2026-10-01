@@ -20,7 +20,7 @@ export default function RoleScreen() {
   };
 
   const selectHelper = () => {
-    // We will build this flow later.
+    router.push("/helper-verification");
   };
 
   return (
