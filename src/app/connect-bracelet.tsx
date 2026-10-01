@@ -1,16 +1,16 @@
+import { Bluetooth, Check, ChevronRight } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Bluetooth, Check, ChevronRight } from "lucide-react-native";
 
+import { colors } from "@/constants/colors";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 
 type ConnectionState = "idle" | "searching" | "connected";
@@ -88,9 +88,9 @@ export default function ConnectBraceletScreen() {
             ]}
           >
             {isConnected ? (
-              <Check size={21} color="#FFFFFF" strokeWidth={3} />
+              <Check size={21} color={colors.surface} strokeWidth={3} />
             ) : (
-              <Bluetooth size={21} color="#2F6591" />
+              <Bluetooth size={21} color= {colors.primary} />
             )}
           </View>
 
@@ -138,7 +138,7 @@ export default function ConnectBraceletScreen() {
           ]}
         >
           {isSearching ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={colors.surface} />
           ) : (
             <>
               <Text style={styles.primaryButtonText}>
@@ -148,13 +148,13 @@ export default function ConnectBraceletScreen() {
               {isConnected ? (
                 <Check
                   size={22}
-                  color="#FFFFFF"
+                  color={colors.surface}
                   style={styles.buttonIcon}
                 />
               ) : (
                 <ChevronRight
                   size={22}
-                  color="#FFFFFF"
+                  color={colors.surface}
                   style={styles.buttonIcon}
                 />
               )}
@@ -191,7 +191,7 @@ function Instruction({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EEF4F7",
+    backgroundColor: colors.background,
   },
 
   scrollView: {
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     fontSize: 31,
     lineHeight: 39,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   description: {
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     lineHeight: 23,
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   sectionTitle: {
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontSize: 17,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   steps: {
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#D5DEE5",
+    borderBottomColor: colors.border,
   },
 
   lastStepRow: {
@@ -258,14 +258,14 @@ const styles = StyleSheet.create({
   stepNumberText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#2F6591",
+    color: colors.primary,
   },
 
   stepText: {
     flex: 1,
     fontSize: 15,
     lineHeight: 21,
-    color: "#142235",
+    color: colors.text,
   },
 
   statusRow: {
@@ -280,12 +280,12 @@ const styles = StyleSheet.create({
     borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     marginRight: 12,
   },
 
   statusIconConnected: {
-    backgroundColor: "#2F6591",
+    backgroundColor: colors.primary,
   },
 
   statusText: {
@@ -296,14 +296,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 21,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   statusDescription: {
     marginTop: 3,
     fontSize: 13,
     lineHeight: 18,
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   bottom: {
@@ -318,13 +318,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 48,
     paddingVertical: 16,
     borderRadius: 14,
-    backgroundColor: "#2F6591",
+    backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
   },
 
   connectedButton: {
-    backgroundColor: "#286E69",
+    backgroundColor: colors.success,
   },
 
   buttonPressed: {
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
 
   primaryButtonText: {
     textAlign: "center",
-    color: "#FFFFFF",
+    color: colors.surface,
     fontSize: 18,
     fontWeight: "700",
   },

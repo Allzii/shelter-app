@@ -1,5 +1,4 @@
 import { router } from "expo-router";
-import { Phone, User } from "lucide-react-native";
 import { useState } from "react";
 import {
   Keyboard,
@@ -12,13 +11,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import FormInput from "@/components/ui/FormInput";
+import NameFields from "@/components/ui/NameFields";
+import PhoneInput from "@/components/ui/PhoneInput";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
-import {
-  capitalizeFirstLetter,
-  formatPhoneNumber,
-} from "@/components/formatters";
+import { colors } from "@/constants/colors";
 
 export default function HelperDetailsScreen() {
   const [firstName, setFirstName] = useState("");
@@ -60,39 +57,16 @@ export default function HelperDetailsScreen() {
             Uppgifterna visas för personen du hjälper.
           </Text>
 
-          <FormInput
-            label="Förnamn"
-            icon={User}
-            value={firstName}
-            onChangeText={(value) =>
-              setFirstName(capitalizeFirstLetter(value))
-            }
-            placeholder="Skriv ditt förnamn"
-            autoCapitalize="words"
-            autoComplete="given-name"
+          <NameFields
+            firstName={firstName}
+            lastName={lastName}
+            onFirstNameChange={setFirstName}
+            onLastNameChange={setLastName}
           />
 
-          <FormInput
-            label="Efternamn"
-            icon={User}
-            value={lastName}
-            onChangeText={(value) =>
-              setLastName(capitalizeFirstLetter(value))
-            }
-            placeholder="Skriv ditt efternamn"
-            autoCapitalize="words"
-            autoComplete="family-name"
-          />
-
-          <FormInput
-            label="Telefonnummer"
-            icon={Phone}
+          <PhoneInput
             value={phone}
-            onChangeText={(value) => setPhone(formatPhoneNumber(value))}
-            placeholder="070-123 45 67"
-            keyboardType="phone-pad"
-            autoComplete="tel"
-            maxLength={13}
+            onChangeText={setPhone}
           />
         </ScrollView>
 
@@ -112,7 +86,7 @@ export default function HelperDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EEF4F7",
+    backgroundColor: colors.background,
   },
 
   keyboardView: {
@@ -130,7 +104,7 @@ const styles = StyleSheet.create({
     fontSize: 31,
     lineHeight: 39,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   description: {
@@ -138,7 +112,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontSize: 16,
     lineHeight: 23,
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   bottom: {

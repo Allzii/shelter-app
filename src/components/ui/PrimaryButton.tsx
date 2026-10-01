@@ -5,6 +5,8 @@ import {
   Text,
 } from "react-native";
 
+import { colors } from "@/constants/colors";
+
 type PrimaryButtonProps = {
   title: string;
   onPress: () => void;
@@ -30,7 +32,7 @@ export default function PrimaryButton({
 
       <ChevronRight
         size={22}
-        color="#FFFFFF"
+        color={colors.surface}
         style={styles.arrow}
       />
     </Pressable>
@@ -42,7 +44,9 @@ const styles = StyleSheet.create({
     width: "100%",
     minHeight: 58,
     borderRadius: 14,
-    backgroundColor: "#2F6591",
+    paddingHorizontal: 48,
+    paddingVertical: 16,
+    backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -56,7 +60,8 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    color: "#FFFFFF",
+    color: colors.surface,
+    textAlign: "center",
     fontSize: 18,
     fontWeight: "700",
   },

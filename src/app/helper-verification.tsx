@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
+import { colors } from "@/constants/colors";
 
 type VerificationState = "idle" | "verifying" | "verified";
 
@@ -82,9 +83,9 @@ export default function HelperVerificationScreen() {
             ]}
           >
             {isVerified ? (
-              <Check size={64} color="#286E69" strokeWidth={2.5} />
+              <Check size={64} color= {colors.success} strokeWidth={2.5} />
             ) : (
-              <ShieldCheck size={72} color="#2F6591" strokeWidth={1.6} />
+              <ShieldCheck size={72} color= {colors.primary} strokeWidth={1.6} />
             )}
           </View>
 
@@ -131,7 +132,7 @@ export default function HelperVerificationScreen() {
             ]}
           >
             {isVerifying && (
-              <ActivityIndicator color="#FFFFFF" />
+              <ActivityIndicator color={colors.surface} />
             )}
 
             <Text style={styles.verifyButtonText}>
@@ -147,7 +148,7 @@ export default function HelperVerificationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EEF4F7",
+    backgroundColor: colors.background,
   },
 
   scrollView: {
@@ -166,14 +167,14 @@ const styles = StyleSheet.create({
     fontSize: 31,
     lineHeight: 39,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   description: {
     marginTop: 10,
     fontSize: 16,
     lineHeight: 23,
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   verification: {
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
   },
 
   iconCircleVerified: {
-    backgroundColor: "#DDEFEA",
+    backgroundColor: colors.successBackground,
   },
 
   verificationTitle: {
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     lineHeight: 29,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   verificationDescription: {
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 16,
     lineHeight: 24,
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   bottom: {
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderRadius: 14,
-    backgroundColor: "#2F6591",
+    backgroundColor: colors.primary,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -240,7 +241,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 18,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: colors.surface,
   },
 
   pressed: {

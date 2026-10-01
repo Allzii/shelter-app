@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Check, ChevronDown, Phone, User, Users } from "lucide-react-native";
+import { Check, ChevronDown, Users } from "lucide-react-native";
 import { useState } from "react";
 import {
   Keyboard,
@@ -14,12 +14,14 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import FormInput from "@/components/ui/FormInput";
+import NameFields from "@/components/ui/NameFields";
+import PhoneInput from "@/components/ui/PhoneInput";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
+import { colors } from "@/constants/colors";
 import {
   capitalizeFirstLetter,
-  formatPhoneNumber,
-} from "@/components/formatters";
+} from "@/utils/formatters";
 
 const relations = [
   "Partner",
@@ -88,29 +90,14 @@ export default function EmergencyContactScreen() {
             Vem vill du ska få veta när du ber om hjälp?
           </Text>
 
-          <FormInput
-            label="Förnamn"
-            icon={User}
-            value={firstName}
-            onChangeText={(value) =>
-              setFirstName(capitalizeFirstLetter(value))
-            }
-            placeholder="Skriv personens förnamn"
-            autoCapitalize="words"
-            autoComplete="off"
+          <NameFields
+            firstName={firstName}
+            lastName={lastName}
+            onFirstNameChange={setFirstName}
+            onLastNameChange={setLastName}
+            forOtherPerson
           />
 
-          <FormInput
-            label="Efternamn"
-            icon={User}
-            value={lastName}
-            onChangeText={(value) =>
-              setLastName(capitalizeFirstLetter(value))
-            }
-            placeholder="Skriv personens efternamn"
-            autoCapitalize="words"
-            autoComplete="off"
-          />
 
           <View style={styles.relationWrapper}>
             <Text style={styles.label}>Relation</Text>
@@ -128,7 +115,7 @@ export default function EmergencyContactScreen() {
                 pressed && styles.pressed,
               ]}
             >
-              <Users size={21} color="#607080" />
+              <Users size={21} color= {colors.textSecondary} />
 
               <Text
                 style={[
@@ -141,7 +128,7 @@ export default function EmergencyContactScreen() {
 
               <ChevronDown
                 size={21}
-                color="#607080"
+                color= {colors.textSecondary}
                 style={{
                   transform: [
                     { rotate: showRelations ? "180deg" : "0deg" },
@@ -179,7 +166,7 @@ export default function EmergencyContactScreen() {
                       </Text>
 
                       {relation === item && (
-                        <Check size={20} color="#2F6591" />
+                        <Check size={20} color= {colors.primary} />
                       )}
                     </Pressable>
                   ))}
@@ -201,15 +188,10 @@ export default function EmergencyContactScreen() {
             />
           )}
 
-          <FormInput
-            label="Telefonnummer"
-            icon={Phone}
+          <PhoneInput
             value={phone}
-            onChangeText={(value) => setPhone(formatPhoneNumber(value))}
-            placeholder="070-123 45 67"
-            keyboardType="phone-pad"
-            autoComplete="off"
-            maxLength={13}
+            onChangeText={setPhone}
+            forOtherPerson
           />
 
           <Text style={styles.infoText}>
@@ -234,7 +216,7 @@ export default function EmergencyContactScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EEF4F7",
+    backgroundColor: colors.background,
   },
 
   keyboardView: {
@@ -251,7 +233,7 @@ const styles = StyleSheet.create({
     fontSize: 31,
     lineHeight: 39,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   description: {
@@ -259,7 +241,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontSize: 16,
     lineHeight: 22,
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   relationWrapper: {
@@ -271,16 +253,16 @@ const styles = StyleSheet.create({
     marginBottom: 7,
     fontSize: 16,
     fontWeight: "600",
-    color: "#142235",
+    color: colors.text,
   },
 
   relationButton: {
     height: 52,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#D5DEE5",
+    borderColor: colors.border,
     borderRadius: 14,
     paddingHorizontal: 15,
   },
@@ -289,11 +271,11 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 11,
     fontSize: 16,
-    color: "#142235",
+    color: colors.text,
   },
 
   placeholderText: {
-    color: "#8A97A5",
+    color: colors.placeholder,
   },
 
   dropdown: {
@@ -302,10 +284,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     maxHeight: 230,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#D5DEE5",
+    borderColor: colors.border,
     overflow: "hidden",
     zIndex: 20,
     shadowColor: "#000000",
@@ -327,7 +309,7 @@ const styles = StyleSheet.create({
 
   dropdownText: {
     fontSize: 16,
-    color: "#142235",
+    color: colors.text,
   },
 
   dropdownSelected: {
@@ -335,7 +317,7 @@ const styles = StyleSheet.create({
   },
 
   dropdownSelectedText: {
-    color: "#2F6591",
+    color: colors.primary,
     fontWeight: "600",
   },
 
@@ -347,14 +329,14 @@ const styles = StyleSheet.create({
     marginTop: 18,
     fontSize: 14,
     lineHeight: 20,
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   bottom: {
     paddingHorizontal: 28,
     paddingTop: 12,
     paddingBottom: 12,
-    backgroundColor: "#EEF4F7",
+    backgroundColor: colors.background,
   },
 
   pressed: {

@@ -6,6 +6,8 @@ import {
   View,
 } from "react-native";
 
+import { colors } from "@/constants/colors";
+
 type HelpOptionProps = {
   title: string;
   description: string;
@@ -38,7 +40,7 @@ export default function HelpOption({
       >
         <Icon
           size={26}
-          color={selected ? "#FFFFFF" : "#607080"}
+          color={selected ? colors.surface : colors.textSecondary}
         />
       </View>
 
@@ -61,7 +63,7 @@ export default function HelpOption({
         {selected && (
           <Check
             size={18}
-            color="#FFFFFF"
+            color={colors.surface}
             strokeWidth={3}
           />
         )}
@@ -75,7 +77,7 @@ const styles = StyleSheet.create({
     minHeight: 105,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderWidth: 2,
     borderColor: "transparent",
     borderRadius: 18,
@@ -84,7 +86,7 @@ const styles = StyleSheet.create({
   },
 
   optionSelected: {
-    borderColor: "#2F6591",
+    borderColor: colors.primary,
     backgroundColor: "#F4F9FC",
   },
 
@@ -103,7 +105,7 @@ const styles = StyleSheet.create({
   },
 
   iconContainerSelected: {
-    backgroundColor: "#2F6591",
+    backgroundColor: colors.primary,
   },
 
   content: {
@@ -114,14 +116,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
     marginBottom: 3,
   },
 
   description: {
     fontSize: 14,
     lineHeight: 19,
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   checkbox: {
@@ -135,7 +137,7 @@ const styles = StyleSheet.create({
   },
 
   checkboxSelected: {
-    backgroundColor: "#2F6591",
-    borderColor: "#2F6591",
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
 });

@@ -1,8 +1,9 @@
+import { router } from "expo-router";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
 
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import { colors } from "@/constants/colors";
 
 export default function StartScreen() {
   const handleGetStarted = () => {
@@ -69,7 +70,7 @@ export default function StartScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EEF4F7",
+    backgroundColor: colors.background,
   },
 
   safeArea: {
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     lineHeight: 38,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   description: {

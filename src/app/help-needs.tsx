@@ -1,13 +1,13 @@
-import { useState } from "react";
 import { router } from "expo-router";
 import {
   Accessibility,
   Footprints,
-  PersonStanding,
-  MoveUp,
   Minus,
+  MoveUp,
+  PersonStanding,
   Plus,
 } from "lucide-react-native";
+import { useState } from "react";
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -25,6 +25,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import HelpOption from "@/components/ui/HelpOption";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
+import { colors } from "@/constants/colors";
+
 
 export default function HelpNeedsScreen() {
   const [selectedNeeds, setSelectedNeeds] = useState<string[]>([]);
@@ -130,7 +132,7 @@ export default function HelpNeedsScreen() {
                       pressed && styles.pressed,
                     ]}
                   >
-                    <Minus size={22} color="#142235" />
+                    <Minus size={22} color= {colors.text} />
                   </Pressable>
 
                   <Text
@@ -150,7 +152,7 @@ export default function HelpNeedsScreen() {
                       pressed && styles.pressed,
                     ]}
                   >
-                    <Plus size={22} color="#142235" />
+                    <Plus size={22} color= {colors.text} />
                   </Pressable>
                 </View>
               </View>
@@ -167,8 +169,8 @@ export default function HelpNeedsScreen() {
                   accessibilityLabel="Hiss i byggnaden"
                   value={hasElevator}
                   onValueChange={setHasElevator}
-                  trackColor={{ false: "#C5D0DA", true: "#2F6591" }}
-                  thumbColor="#FFFFFF"
+                  trackColor={{ false: "#C5D0DA", true: colors.primary }}
+                  thumbColor={colors.surface}
                   ios_backgroundColor="#C5D0DA"
                 />
               </View>
@@ -187,7 +189,7 @@ export default function HelpNeedsScreen() {
               value={additionalInfo}
               onChangeText={setAdditionalInfo}
               placeholder="Skriv här..."
-              placeholderTextColor="#8A97A5"
+              placeholderTextColor= {colors.placeholder}
               multiline
               textAlignVertical="top"
               maxLength={300}
@@ -214,7 +216,7 @@ export default function HelpNeedsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EEF4F7",
+    backgroundColor: colors.background,
   },
 
   keyboardView: {
@@ -232,14 +234,14 @@ const styles = StyleSheet.create({
     fontSize: 31,
     lineHeight: 38,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   description: {
     marginTop: 10,
     fontSize: 16,
     lineHeight: 23,
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   options: {
@@ -256,13 +258,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 25,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   homeCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderRadius: 20,
-    shadowColor: "#142235",
+    shadowColor: colors.text,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 5,
@@ -289,14 +291,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
     fontWeight: "600",
-    color: "#142235",
+    color: colors.text,
   },
 
   homeDescription: {
     marginTop: 3,
     fontSize: 14,
     lineHeight: 20,
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   floorControls: {
@@ -319,7 +321,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 22,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
     fontVariant: ["tabular-nums"],
   },
 
@@ -340,7 +342,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 26,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   optionalText: {
@@ -352,15 +354,15 @@ const styles = StyleSheet.create({
   extraInput: {
     minHeight: 105,
     marginTop: 8,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#D5DEE5",
+    borderColor: colors.border,
     borderRadius: 14,
     paddingHorizontal: 15,
     paddingVertical: 14,
     fontSize: 16,
     lineHeight: 22,
-    color: "#142235",
+    color: colors.text,
   },
 
   characterCount: {
@@ -374,6 +376,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     paddingTop: 12,
     paddingBottom: 12,
-    backgroundColor: "#EEF4F7",
+    backgroundColor: colors.background,
   },
 });

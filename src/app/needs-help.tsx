@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { MapPin, Phone, User } from "lucide-react-native";
+import { MapPin } from "lucide-react-native";
 import { useState } from "react";
 import {
   Keyboard,
@@ -14,13 +14,15 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import FormInput from "@/components/ui/FormInput";
+import NameFields from "@/components/ui/NameFields";
+import PhoneInput from "@/components/ui/PhoneInput";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
+import { colors } from "@/constants/colors";
 import {
   capitalizeFirstLetter,
-  formatPhoneNumber,
   formatPostalCode,
-} from "@/components/formatters";
+} from "@/utils/formatters";
 
 export default function NeedsHelpScreen() {
   const [firstName, setFirstName] = useState("");
@@ -66,39 +68,16 @@ export default function NeedsHelpScreen() {
 
           <Text style={styles.description}>Fyll i dina uppgifter.</Text>
 
-          <FormInput
-            label="Förnamn"
-            icon={User}
-            value={firstName}
-            onChangeText={(value) =>
-              setFirstName(capitalizeFirstLetter(value))
-            }
-            placeholder="Skriv ditt förnamn"
-            autoCapitalize="words"
-            autoComplete="given-name"
+          <NameFields
+            firstName={firstName}
+            lastName={lastName}
+            onFirstNameChange={setFirstName}
+            onLastNameChange={setLastName}
           />
 
-          <FormInput
-            label="Efternamn"
-            icon={User}
-            value={lastName}
-            onChangeText={(value) =>
-              setLastName(capitalizeFirstLetter(value))
-            }
-            placeholder="Skriv ditt efternamn"
-            autoCapitalize="words"
-            autoComplete="family-name"
-          />
-
-          <FormInput
-            label="Telefonnummer"
-            icon={Phone}
+          <PhoneInput
             value={phone}
-            onChangeText={(value) => setPhone(formatPhoneNumber(value))}
-            placeholder="070-123 45 67"
-            keyboardType="phone-pad"
-            autoComplete="tel"
-            maxLength={13}
+            onChangeText={setPhone}
           />
 
           <FormInput
@@ -122,7 +101,7 @@ export default function NeedsHelpScreen() {
                   setPostalCode(formatPostalCode(value))
                 }
                 placeholder="Postnummer"
-                placeholderTextColor="#8A97A5"
+                placeholderTextColor= {colors.placeholder}
                 keyboardType="number-pad"
                 maxLength={6}
               />
@@ -136,7 +115,7 @@ export default function NeedsHelpScreen() {
                   setCity(capitalizeFirstLetter(value))
                 }
                 placeholder="Ort"
-                placeholderTextColor="#8A97A5"
+                placeholderTextColor= {colors.placeholder}
                 autoCapitalize="words"
               />
             </View>
@@ -159,7 +138,7 @@ export default function NeedsHelpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EEF4F7",
+    backgroundColor: colors.background,
   },
 
   keyboardView: {
@@ -176,7 +155,7 @@ const styles = StyleSheet.create({
     fontSize: 31,
     lineHeight: 39,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   description: {
@@ -184,7 +163,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontSize: 16,
     lineHeight: 22,
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   addressRow: {
@@ -197,9 +176,9 @@ const styles = StyleSheet.create({
     flex: 0.9,
     height: 52,
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#D5DEE5",
+    borderColor: colors.border,
     borderRadius: 14,
     paddingHorizontal: 15,
   },
@@ -208,9 +187,9 @@ const styles = StyleSheet.create({
     flex: 1.1,
     height: 52,
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#D5DEE5",
+    borderColor: colors.border,
     borderRadius: 14,
     paddingHorizontal: 15,
   },
@@ -218,13 +197,13 @@ const styles = StyleSheet.create({
   smallInput: {
     flex: 1,
     fontSize: 16,
-    color: "#142235",
+    color: colors.text,
   },
 
   bottom: {
     paddingHorizontal: 28,
     paddingTop: 12,
     paddingBottom: 12,
-    backgroundColor: "#EEF4F7",
+    backgroundColor: colors.background,
   },
 });

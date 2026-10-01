@@ -7,6 +7,8 @@ import {
   View,
 } from "react-native";
 
+import { colors } from "@/constants/colors";
+
 type FormInputProps = TextInputProps & {
   label: string;
   icon?: LucideIcon;
@@ -22,11 +24,11 @@ export default function FormInput({
       <Text style={styles.label}>{label}</Text>
 
       <View style={styles.inputContainer}>
-        {Icon && <Icon size={21} color="#607080" />}
+        {Icon && <Icon size={21} color= {colors.textSecondary} />}
 
         <TextInput
           style={styles.input}
-          placeholderTextColor="#8A97A5"
+          placeholderTextColor= {colors.placeholder}
           {...textInputProps}
         />
       </View>
@@ -43,16 +45,16 @@ const styles = StyleSheet.create({
     marginBottom: 7,
     fontSize: 16,
     fontWeight: "600",
-    color: "#142235",
+    color: colors.text,
   },
 
   inputContainer: {
     height: 52,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: "#D5DEE5",
+    borderColor: colors.border,
     borderRadius: 14,
     paddingHorizontal: 15,
   },
@@ -62,6 +64,6 @@ const styles = StyleSheet.create({
     height: "100%",
     marginLeft: 11,
     fontSize: 16,
-    color: "#142235",
+    color: colors.text,
   },
 });

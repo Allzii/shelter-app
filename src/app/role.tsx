@@ -1,5 +1,5 @@
-import { Accessibility, HandHeart, ChevronRight } from "lucide-react-native";
 import { router } from "expo-router";
+import { Accessibility, ChevronRight, HandHeart } from "lucide-react-native";
 import {
   Pressable,
   StyleSheet,
@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import ScreenHeader from "@/components/ui/ScreenHeader";
+import { colors } from "@/constants/colors";
 
 export default function RoleScreen() {
   const { width } = useWindowDimensions();
@@ -104,7 +105,7 @@ export default function RoleScreen() {
               ]}
             >
               <View style={[styles.iconContainer, styles.iconHelper]}>
-                <HandHeart size={32} color="#2F6591" />
+                <HandHeart size={32} color= {colors.primary} />
               </View>
 
               <View style={styles.optionContent}>
@@ -134,7 +135,7 @@ export default function RoleScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EEF4F7",
+    backgroundColor: colors.background,
   },
 
   safeArea: {
@@ -172,14 +173,14 @@ const styles = StyleSheet.create({
     fontSize: 31,
     lineHeight: 39,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   subtitle: {
     marginTop: 12,
     fontSize: 17,
     lineHeight: 24,
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   options: {
@@ -189,7 +190,7 @@ const styles = StyleSheet.create({
 
   option: {
     minHeight: 132,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     borderRadius: 20,
     borderWidth: 1.5,
     borderColor: "#DCE7EE",

@@ -1,11 +1,11 @@
 import { router } from "expo-router";
 import {
+  Accessibility,
   Car,
   Check,
   HandHelping,
   Package,
   PersonStanding,
-  Accessibility,
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
@@ -21,6 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
+import { colors } from "@/constants/colors";
 
 const options: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "company", label: "Följa någon till skyddsrummet", icon: PersonStanding },
@@ -70,10 +71,10 @@ export default function HelperSkillsScreen() {
                   pressed && styles.pressed,
                 ]}
               >
-                <Icon size={23} color="#2F6591" />
+                <Icon size={23} color= {colors.primary} />
                 <Text style={styles.optionText}>{label}</Text>
                 <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
-                  {isSelected && <Check size={15} color="#FFFFFF" strokeWidth={3} />}
+                  {isSelected && <Check size={15} color={colors.surface} strokeWidth={3} />}
                 </View>
               </Pressable>
             );
@@ -95,7 +96,7 @@ export default function HelperSkillsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EEF4F7",
+    backgroundColor: colors.background,
   },
   content: {
     paddingHorizontal: 28,
@@ -106,13 +107,13 @@ const styles = StyleSheet.create({
     fontSize: 31,
     lineHeight: 39,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
   description: {
     marginTop: 9,
     fontSize: 16,
     lineHeight: 23,
-    color: "#607080",
+    color: colors.textSecondary,
   },
   options: {
     marginTop: 26,
@@ -125,12 +126,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: "#D5DEE5",
+    borderColor: colors.border,
     borderRadius: 14,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
   },
   optionSelected: {
-    borderColor: "#2F6591",
+    borderColor: colors.primary,
     backgroundColor: "#F7FBFD",
   },
   optionText: {
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 13,
     fontSize: 16,
     lineHeight: 21,
-    color: "#142235",
+    color: colors.text,
   },
   checkbox: {
     width: 23,
@@ -150,8 +151,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   checkboxSelected: {
-    borderColor: "#2F6591",
-    backgroundColor: "#2F6591",
+    borderColor: colors.primary,
+    backgroundColor: colors.primary,
   },
   pressed: {
     opacity: 0.75,

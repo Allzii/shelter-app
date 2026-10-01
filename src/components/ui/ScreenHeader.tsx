@@ -7,6 +7,8 @@ import {
   View,
 } from "react-native";
 
+import { colors } from "@/constants/colors";
+
 type ScreenHeaderProps = {
   step?: string;
 };
@@ -29,7 +31,7 @@ export default function ScreenHeader({
             pressed && styles.pressed,
           ]}
         >
-          <ChevronLeft size={24} color="#2F6591" />
+          <ChevronLeft size={24} color= {colors.primary } />
           <Text style={styles.backText}>Tillbaka</Text>
         </Pressable>
 
@@ -71,23 +73,23 @@ const styles = StyleSheet.create({
     marginLeft: 3,
     fontSize: 16,
     fontWeight: "600",
-    color: "#2F6591",
+    color: colors.primary,
   },
 
   stepText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   progressTrack: {
     height: 2,
-    backgroundColor: "#D5DEE5",
+    backgroundColor: colors.border,
   },
 
   progressValue: {
     height: 2,
-    backgroundColor: "#2F6591",
+    backgroundColor: colors.primary,
   },
 
   pressed: {

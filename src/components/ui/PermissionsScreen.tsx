@@ -3,21 +3,22 @@ import * as Notifications from "expo-notifications";
 import { Bell, Check, MapPin, type LucideIcon } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  AppState,
-  Linking,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    ActivityIndicator,
+    Alert,
+    AppState,
+    Linking,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
+import { colors } from "@/constants/colors";
 
 type PermissionState =
   | "idle"
@@ -342,7 +343,7 @@ function PermissionRow({
   return (
     <View style={[styles.settingRow, isLast && styles.lastSettingRow]}>
       <View style={styles.settingIcon}>
-        <Icon size={22} color="#2F6591" />
+        <Icon size={22} color= {colors.primary} />
       </View>
 
       <View style={styles.settingText}>
@@ -367,9 +368,9 @@ function PermissionRow({
         ]}
       >
         {isRequesting ? (
-          <ActivityIndicator size="small" color="#2F6591" />
+          <ActivityIndicator size="small" color= {colors.primary } />
         ) : isGranted ? (
-          <Check size={18} color="#286E69" strokeWidth={3} />
+          <Check size={18} color= {colors.success} strokeWidth={3} />
         ) : (
           <Text
             style={[
@@ -388,7 +389,7 @@ function PermissionRow({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#EEF4F7",
+    backgroundColor: colors.background,
   },
 
   scrollView: {
@@ -406,21 +407,21 @@ const styles = StyleSheet.create({
     fontSize: 31,
     lineHeight: 39,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   description: {
     marginTop: 9,
     fontSize: 16,
     lineHeight: 23,
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   settings: {
     marginTop: 30,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: "#D5DEE5",
+    borderColor: colors.border,
   },
 
   settingRow: {
@@ -429,7 +430,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#D5DEE5",
+    borderBottomColor: colors.border,
   },
 
   lastSettingRow: {
@@ -442,7 +443,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.surface,
     marginRight: 12,
   },
 
@@ -454,14 +455,14 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#142235",
+    color: colors.text,
   },
 
   settingDescription: {
     marginTop: 3,
     fontSize: 12,
     lineHeight: 17,
-    color: "#607080",
+    color: colors.textSecondary,
   },
 
   permissionButton: {
@@ -478,21 +479,21 @@ const styles = StyleSheet.create({
   permissionButtonGranted: {
     minWidth: 44,
     paddingHorizontal: 9,
-    backgroundColor: "#DDEFEA",
+    backgroundColor: colors.successBackground,
   },
 
   permissionButtonDenied: {
-    backgroundColor: "#F5E3E1",
+    backgroundColor: colors.errorBackground,
   },
 
   permissionButtonText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#2F6591",
+    color: colors.primary,
   },
 
   permissionButtonRetryText: {
-    color: "#9B4A43",
+    color: colors.error,
   },
 
   pressed: {
