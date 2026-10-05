@@ -32,8 +32,13 @@ export default function ConnectBraceletScreen() {
   }, []);
 
   const handleConnect = () => {
-    if (searchTimer.current !== null) return;
-
+    if (
+      searchTimer.current !== null ||
+      connectionState === "connected"
+    ) {
+      return;
+    }
+    
     setConnectionState("searching");
 
     searchTimer.current = setTimeout(() => {
@@ -90,7 +95,7 @@ export default function ConnectBraceletScreen() {
             {isConnected ? (
               <Check size={21} color={colors.surface} strokeWidth={3} />
             ) : (
-              <Bluetooth size={21} color= {colors.primary} />
+              <Bluetooth size={21} color={colors.primary} />
             )}
           </View>
 
