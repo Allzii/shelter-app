@@ -1,37 +1,99 @@
 ﻿# TryggNära
 
-A mobile app project for people who need help reaching a shelter. The intended flow is for a wrist button to send a help request to nearby volunteers, who can accept or decline.
+Mobilappen för vårt innovationsprojekt. Byggd med React Native, Expo och TypeScript.
 
-## Current state
+## Installera
 
-The app currently contains a Swedish welcome screen and a role-selection screen. The welcome screen opens role selection; the information button and role choices are placeholders. Wrist-button integration, location matching, notifications, and accepting or declining requests are not implemented yet.
+På datorn:
 
-## Development
+- [Node.js](https://nodejs.org/) – välj **LTS**. På Windows, ladda ner **Windows Installer (.msi)** och kör installationen. npm följer med.
+- [Git](https://git-scm.com/downloads)
+- [Visual Studio Code](https://code.visualstudio.com/)
 
-This project uses Expo SDK 57, React Native, TypeScript, Expo Router, and npm.
+På telefonen:
+
+- **Expo Go** från App Store eller Google Play.
+
+## Hämta projektet
+
+```sh
+git clone https://github.com/Allzii/shelter-app.git
+cd shelter-app
+```
+
+Öppna sedan mappen `shelter-app` i VS Code via **File → Open Folder**.
+
+## Installera projektets paket
+
+Kör i terminalen, från mappen `shelter-app`:
 
 ```sh
 npm ci
-npm start
 ```
 
-Use `npm run android`, `npm run ios`, or `npm run web` to start Expo for a specific platform. The iOS simulator requires macOS.
+### Windows / PowerShell
+
+Om du får ett fel om att `npm.ps1` inte får köras, använd `npm.cmd` i stället för `npm` och `npx.cmd` i stället för `npx`:
+
+```powershell
+npm.cmd ci
+```
+
+## Logga in på Expo
+
+För iPhone behöver Expo Go och datorns terminal vara inloggade på samma Expo-konto. Skapa ett gratis konto på [expo.dev/signup](https://expo.dev/signup) och logga in i Expo Go.
+
+På datorn:
 
 ```sh
-npm run lint
-npm run typecheck
+npx expo login
 ```
 
-Install new packages with `npx expo install <package>` to resolve SDK-compatible versions.
+I Windows PowerShell:
 
-## Project structure
+```powershell
+npx.cmd expo login
+```
 
-- `src/app/_layout.tsx`: root stack navigation.
-- `src/app/index.tsx`: welcome screen.
-- `src/app/role.tsx`: role selection.
-- `assets/images/tryggnara.png`: welcome-screen logo.
-- `app.json`: Expo configuration and launcher/splash assets.
+## Starta appen
 
-Keep shared components, hooks, and utilities outside `src/app`, which is reserved for routes. Launcher icons and splash artwork still use the starter assets and need dedicated TryggNära artwork.
+Anslut datorn och telefonen till samma wifi. Kör:
 
-See the [Expo SDK 57 documentation](https://docs.expo.dev/versions/v57.0.0/) for APIs matching this project.
+```sh
+npx expo start --lan
+```
+
+I Windows PowerShell:
+
+```powershell
+npx.cmd expo start --lan
+```
+
+När QR-koden visas:
+
+- **iPhone:** skanna med Kamera och öppna länken i Expo Go.
+- **Android:** skanna via Expo Go.
+
+Låt terminalen vara igång medan du testar. Stoppa servern med **Ctrl + C**.
+
+Nästa gång räcker det att öppna projektmappen och köra startkommandot igen. Paketen behöver inte installeras varje gång.
+
+## Hämta nya ändringar
+
+Stoppa servern och kör följande i projektmappen:
+
+```sh
+git pull
+npm ci
+npx expo start --lan
+```
+
+I Windows PowerShell:
+
+```powershell
+git pull
+npm.cmd ci
+npx.cmd expo start --lan
+```
+
+Om du själv har ändrat kod, committa dina ändringar innan du kör `git pull`.
