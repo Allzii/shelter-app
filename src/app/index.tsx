@@ -7,7 +7,7 @@ import { colors } from "@/constants/colors";
 
 export default function StartScreen() {
   const handleGetStarted = () => {
-    router.push("/role");
+    router.push("/sign-up");
   };
 
   const handleAbout = () => {
@@ -47,6 +47,17 @@ export default function StartScreen() {
             title="Kom igång"
             onPress={handleGetStarted}
           />
+
+          <Pressable
+            onPress={() => router.push("/login")}
+            accessibilityRole="button"
+            style={({ pressed }) => [
+              styles.loginButton,
+              pressed && styles.aboutPressed,
+            ]}
+          >
+            <Text style={styles.aboutText}>Har du redan ett konto? Logga in</Text>
+          </Pressable>
 
           <Pressable
             onPress={handleAbout}
@@ -158,6 +169,12 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     paddingBottom: 28,
+  },
+
+  loginButton: {
+    minHeight: 48,
+    justifyContent: "center",
+    paddingHorizontal: 12,
   },
 
   aboutButton: {
