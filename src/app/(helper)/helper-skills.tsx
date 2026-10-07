@@ -86,7 +86,7 @@ export default function HelperSkillsScreen() {
         <PrimaryButton
           title="Fortsätt"
           //disabled={selected.length === 0}
-          onPress={() => router.push("/helper-permissions")}
+          onPress={() => router.push("/helper-training")}
         />
       </View>
     </SafeAreaView>

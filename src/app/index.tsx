@@ -23,6 +23,21 @@ export default function StartScreen() {
       </View>
 
       <SafeAreaView style={styles.safeArea}>
+
+        <Pressable
+          onPress={handleAbout}
+          accessibilityRole="button"
+          accessibilityLabel="Så fungerar TryggNära"
+          style={({ pressed }) => [
+            styles.aboutButton,
+            pressed && styles.aboutPressed,
+          ]}
+        >
+          <Text style={styles.aboutText} maxFontSizeMultiplier={1.3}>
+            Så fungerar det
+          </Text>
+        </Pressable>
+
         <View style={styles.main}>
           <Image
             source={require("../../assets/images/tryggnara.png")}
@@ -30,7 +45,7 @@ export default function StartScreen() {
           />
 
           <Text style={styles.brand} maxFontSizeMultiplier={1.3}>
-            TryggNära
+             AppNamn
           </Text>
 
           <Text style={styles.title} maxFontSizeMultiplier={1.3}>
@@ -57,20 +72,6 @@ export default function StartScreen() {
             ]}
           >
             <Text style={styles.aboutText}>Har du redan ett konto? Logga in</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={handleAbout}
-            accessibilityRole="button"
-            accessibilityLabel="Så fungerar TryggNära"
-            style={({ pressed }) => [
-              styles.aboutButton,
-              pressed && styles.aboutPressed,
-            ]}
-          >
-            <Text style={styles.aboutText} maxFontSizeMultiplier={1.3}>
-              Så fungerar TryggNära
-            </Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -144,7 +145,7 @@ const styles = StyleSheet.create({
   brand: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#236C78",
+    color: "#0D3F68",
     marginBottom: 18,
   },
 
@@ -178,8 +179,10 @@ const styles = StyleSheet.create({
   },
 
   aboutButton: {
+    alignSelf: "flex-end",
+    minHeight: 44,
+    justifyContent: "center",
     paddingVertical: 19,
-    paddingHorizontal: 20,
   },
 
   aboutPressed: {
@@ -187,8 +190,8 @@ const styles = StyleSheet.create({
   },
 
   aboutText: {
-    color: "#315D7E",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.textSecondary,
+    fontSize: 14,
+    fontWeight: "500",
   },
 });

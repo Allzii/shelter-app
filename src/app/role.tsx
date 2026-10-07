@@ -16,7 +16,7 @@ export default function RoleScreen() {
   const { width } = useWindowDimensions();
 
   const selectNeedsHelp = () => {
-    router.push("/needs-help");
+    router.push("/registration-person");
   };
 
   const selectHelper = () => {
@@ -54,7 +54,7 @@ export default function RoleScreen() {
 
         <View style={styles.content}>
           <Text style={styles.title} maxFontSizeMultiplier={1.3}>
-            Hur vill du använda{"\n"}TryggNära?
+            Hur vill du använda{"\n"}AppNamn?
           </Text>
 
           <Text style={styles.subtitle} maxFontSizeMultiplier={1.3}>
@@ -105,7 +105,7 @@ export default function RoleScreen() {
               ]}
             >
               <View style={[styles.iconContainer, styles.iconHelper]}>
-                <HandHeart size={32} color= {colors.primary} />
+                <HandHeart size={32} color={colors.primary} />
               </View>
 
               <View style={styles.optionContent}>

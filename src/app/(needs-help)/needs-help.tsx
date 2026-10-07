@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { MapPin } from "lucide-react-native";
 import { useState } from "react";
 import {
@@ -25,6 +25,20 @@ import {
 } from "@/utils/formatters";
 
 export default function NeedsHelpScreen() {
+  const params = useLocalSearchParams<{
+    person?: string;
+    verification?: string;
+  }>();
+
+  const isOtherPerson = params.person === "other";
+  const person = isOtherPerson ? "other" : "self";
+
+  // Saknad verifieringsstatus räknas som väntande.
+  const verification =
+    params.verification === "demo-verified"
+      ? "demo-verified"
+      : "pending";
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
@@ -42,11 +56,18 @@ export default function NeedsHelpScreen() {
   );
 
   const handleContinue = () => {
-    // Restore validation after testing:
+    // Återaktivera valideringen efter testning:
     // if (!isComplete) return;
 
     Keyboard.dismiss();
-    router.push("/emergency-contact");
+
+    router.push({
+      pathname: "/emergency-contact",
+      params: {
+        person,
+        verification,
+      },
+    });
   };
 
   return (
@@ -64,20 +85,36 @@ export default function NeedsHelpScreen() {
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
         >
-          <Text style={styles.title}>Om dig</Text>
+          <Text style={styles.title}>
+            {isOtherPerson ? "Om personen" : "Om dig"}
+          </Text>
 
-          <Text style={styles.description}>Fyll i dina uppgifter.</Text>
+          <Text style={styles.description}>
+            {isOtherPerson
+              ? "Fyll i uppgifterna för personen som ska använda armbandet."
+              : "Fyll i dina uppgifter."}
+          </Text>
+
+          {verification === "pending" && (
+            <Text style={styles.verificationInfo}>
+              {isOtherPerson
+                ? "Personens identitet behöver verifieras manuellt."
+                : "Din identitet behöver verifieras manuellt."}
+            </Text>
+          )}
 
           <NameFields
             firstName={firstName}
             lastName={lastName}
             onFirstNameChange={setFirstName}
             onLastNameChange={setLastName}
+            forOtherPerson={isOtherPerson}
           />
 
           <PhoneInput
             value={phone}
             onChangeText={setPhone}
+            forOtherPerson={isOtherPerson}
           />
 
           <FormInput
@@ -87,9 +124,15 @@ export default function NeedsHelpScreen() {
             onChangeText={(value) =>
               setStreet(capitalizeFirstLetter(value))
             }
-            placeholder="Gata och nummer"
+            placeholder={
+              isOtherPerson
+                ? "Personens gata och nummer"
+                : "Gata och nummer"
+            }
             autoCapitalize="words"
-            autoComplete="street-address"
+            autoComplete={
+              isOtherPerson ? "off" : "street-address"
+            }
           />
 
           <View style={styles.addressRow}>
@@ -101,8 +144,16 @@ export default function NeedsHelpScreen() {
                   setPostalCode(formatPostalCode(value))
                 }
                 placeholder="Postnummer"
-                placeholderTextColor= {colors.placeholder}
+                placeholderTextColor={colors.placeholder}
+                accessibilityLabel={
+                  isOtherPerson
+                    ? "Personens postnummer"
+                    : "Postnummer"
+                }
                 keyboardType="number-pad"
+                autoComplete={
+                  isOtherPerson ? "off" : "postal-code"
+                }
                 maxLength={6}
               />
             </View>
@@ -115,8 +166,12 @@ export default function NeedsHelpScreen() {
                   setCity(capitalizeFirstLetter(value))
                 }
                 placeholder="Ort"
-                placeholderTextColor= {colors.placeholder}
+                placeholderTextColor={colors.placeholder}
+                accessibilityLabel={
+                  isOtherPerson ? "Personens ort" : "Ort"
+                }
                 autoCapitalize="words"
+                autoComplete="off"
               />
             </View>
           </View>
@@ -125,7 +180,7 @@ export default function NeedsHelpScreen() {
         <View style={styles.bottom}>
           <PrimaryButton
             title="Fortsätt"
-            // Restore validation after testing:
+            // Återaktivera valideringen efter testning:
             // disabled={!isComplete}
             onPress={handleContinue}
           />
@@ -163,6 +218,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontSize: 16,
     lineHeight: 22,
+    color: colors.textSecondary,
+  },
+
+  verificationInfo: {
+    marginTop: 12,
+    fontSize: 14,
+    lineHeight: 20,
     color: colors.textSecondary,
   },
 

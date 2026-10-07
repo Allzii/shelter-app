@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Check, ShieldCheck } from "lucide-react-native";
+import { BookOpen, Check } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -15,48 +15,48 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { colors } from "@/constants/colors";
 
-type VerificationState = "idle" | "verifying" | "verified";
+type TrainingState = "idle" | "in-progress" | "completed";
 
-export default function HelperVerificationScreen() {
-  const [state, setState] = useState<VerificationState>("idle");
+export default function HelperTrainingScreen() {
+  const [state, setState] = useState<TrainingState>("idle");
 
-  const verificationTimer =
+  const trainingTimer =
     useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
-      if (verificationTimer.current !== null) {
-        clearTimeout(verificationTimer.current);
-        verificationTimer.current = null;
+      if (trainingTimer.current !== null) {
+        clearTimeout(trainingTimer.current);
+        trainingTimer.current = null;
       }
     };
   }, []);
 
-  const verify = () => {
-    if (verificationTimer.current !== null || state === "verified") {
+  const startTraining = () => {
+    if (trainingTimer.current !== null || state === "completed") {
       return;
     }
 
-    setState("verifying");
+    setState("in-progress");
 
-    verificationTimer.current = setTimeout(() => {
-      verificationTimer.current = null;
-      setState("verified");
+    trainingTimer.current = setTimeout(() => {
+      trainingTimer.current = null;
+      setState("completed");
     }, 1400);
   };
 
   const handleContinue = () => {
-    if (state !== "verified") return;
+    if (state !== "completed") return;
 
-    router.push("/helper-details");
+    router.push("/helper-permissions");
   };
 
-  const isVerifying = state === "verifying";
-  const isVerified = state === "verified";
+  const isInProgress = state === "in-progress";
+  const isCompleted = state === "completed";
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScreenHeader step="Steg 1 av 4" />
+      <ScreenHeader step="Steg 4 av 5" />
 
       <ScrollView
         style={styles.scrollView}
@@ -64,51 +64,59 @@ export default function HelperVerificationScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View>
-          <Text style={styles.title}>Verifiera din identitet</Text>
+          <Text style={styles.title}>Utbildning för volontärer</Text>
 
           <Text style={styles.description}>
-            Alla hjälpare identifierar sig med BankID innan de kan ta emot
-            en hjälpförfrågan.
+            För att börja hjälpa behöver du verifiera din identitet
+            och genomföra utbildningen.
           </Text>
         </View>
 
         <View
-          style={styles.verification}
+          style={styles.training}
           accessibilityLiveRegion="polite"
         >
           <View
             style={[
               styles.iconCircle,
-              isVerified && styles.iconCircleVerified,
+              isCompleted && styles.iconCircleCompleted,
             ]}
           >
-            {isVerified ? (
-              <Check size={64} color= {colors.success} strokeWidth={2.5} />
+            {isCompleted ? (
+              <Check
+                size={64}
+                color={colors.success}
+                strokeWidth={2.5}
+              />
             ) : (
-              <ShieldCheck size={72} color= {colors.primary} strokeWidth={1.6} />
+              <BookOpen
+                size={64}
+                color={colors.primary}
+                strokeWidth={1.6}
+              />
             )}
           </View>
 
-          <Text style={styles.verificationTitle}>
-            {isVerified
-              ? "Din identitet är verifierad"
-              : isVerifying
-                ? "Väntar på BankID"
-                : "Identifiera dig med BankID"}
+          <Text style={styles.trainingTitle}>
+            {isCompleted
+              ? "Utbildningen är genomförd"
+              : isInProgress
+                ? "Utbildningen pågår"
+                : "Innan du börjar hjälpa"}
           </Text>
 
-          <Text style={styles.verificationDescription}>
-            {isVerified
+          <Text style={styles.trainingDescription}>
+            {isCompleted
               ? "Du kan nu fortsätta registreringen."
-              : isVerifying
-                ? "Identifieringen pågår..."
-                : "BankID bekräftar vem du är när du registrerar dig som hjälpare."}
+              : isInProgress
+                ? "Vänta ett ögonblick..."
+                : "Utbildningen förbereder dig för din roll som volontär i TryggNära."}
           </Text>
         </View>
       </ScrollView>
 
       <View style={styles.bottom}>
-        {isVerified ? (
+        {isCompleted ? (
           <PrimaryButton
             title="Fortsätt"
             onPress={handleContinue}
@@ -117,26 +125,30 @@ export default function HelperVerificationScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={
-              isVerifying ? "Väntar på BankID" : "Öppna BankID"
+              isInProgress
+                ? "Utbildningen pågår"
+                : "Starta utbildningen"
             }
             accessibilityState={{
-              disabled: isVerifying,
-              busy: isVerifying,
+              disabled: isInProgress,
+              busy: isInProgress,
             }}
-            disabled={isVerifying}
-            onPress={verify}
+            disabled={isInProgress}
+            onPress={startTraining}
             style={({ pressed }) => [
-              styles.verifyButton,
+              styles.trainingButton,
               pressed && styles.pressed,
-              isVerifying && styles.disabled,
+              isInProgress && styles.disabled,
             ]}
           >
-            {isVerifying && (
+            {isInProgress && (
               <ActivityIndicator color={colors.surface} />
             )}
 
-            <Text style={styles.verifyButtonText}>
-              {isVerifying ? "Väntar på BankID..." : "Öppna BankID"}
+            <Text style={styles.trainingButtonText}>
+              {isInProgress
+                ? "Utbildningen pågår..."
+                : "Starta utbildningen"}
             </Text>
           </Pressable>
         )}
@@ -177,7 +189,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
 
-  verification: {
+  training: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -195,11 +207,11 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
 
-  iconCircleVerified: {
+  iconCircleCompleted: {
     backgroundColor: colors.successBackground,
   },
 
-  verificationTitle: {
+  trainingTitle: {
     maxWidth: 300,
     textAlign: "center",
     fontSize: 22,
@@ -208,7 +220,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
 
-  verificationDescription: {
+  trainingDescription: {
     maxWidth: 290,
     marginTop: 10,
     textAlign: "center",
@@ -223,7 +235,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
 
-  verifyButton: {
+  trainingButton: {
     width: "100%",
     minHeight: 58,
     paddingHorizontal: 20,
@@ -236,7 +248,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
 
-  verifyButtonText: {
+  trainingButtonText: {
     flexShrink: 1,
     textAlign: "center",
     fontSize: 18,

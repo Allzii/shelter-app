@@ -18,7 +18,7 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { colors } from "@/constants/colors";
 
-export default function SignUpScreen() {
+export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -27,8 +27,7 @@ export default function SignUpScreen() {
   const handleContinue = () => {
     Keyboard.dismiss();
     // Connect authentication here when the backend is ready.
-    setPassword("");
-    router.push("/role");
+    setMessage("Inloggningen är inte ansluten ännu.");
   };
 
   return (
@@ -44,9 +43,9 @@ export default function SignUpScreen() {
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.title}>Skapa konto</Text>
+          <Text style={styles.title}>Logga in</Text>
           <Text style={styles.description}>
-            Skapa ett konto för att använda TryggNära.
+            Välkommen tillbaka till AppNamn.
           </Text>
 
           <FormInput
@@ -66,11 +65,11 @@ export default function SignUpScreen() {
             icon={LockKeyhole}
             value={password}
             onChangeText={setPassword}
-            placeholder="Välj ett lösenord"
+            placeholder="Skriv ditt lösenord"
             secureTextEntry={!showPassword}
             autoCapitalize="none"
             autoCorrect={false}
-            autoComplete="new-password"
+            autoComplete="current-password"
             accessibilityLabel="Lösenord"
           />
           <Pressable
@@ -83,20 +82,27 @@ export default function SignUpScreen() {
               {showPassword ? "Dölj lösenord" : "Visa lösenord"}
             </Text>
           </Pressable>
+          <Pressable
+            onPress={() => setMessage("Återställning av lösenord är inte ansluten ännu.")}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.forgotButton, pressed && styles.pressed]}
+          >
+            <Text style={styles.linkText}>Glömt lösenord?</Text>
+          </Pressable>
         </ScrollView>
 
         <View style={styles.bottom}>
           <PrimaryButton
-            title="Fortsätt"
+            title="Logga in"
             onPress={handleContinue}
           />
           <Pressable
-            onPress={() => router.replace("/login")}
+            onPress={() => router.replace("/sign-up")}
             accessibilityRole="button"
             style={({ pressed }) => [styles.switchButton, pressed && styles.pressed]}
           >
             <Text style={styles.linkText}>
-              Har du redan ett konto? Logga in
+              Har du inget konto? Skapa konto
             </Text>
           </Pressable>
         </View>

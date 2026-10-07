@@ -1,0 +1,309 @@
+import { Check, ShieldCheck } from "lucide-react-native";
+import { useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import ScreenHeader from "@/components/ui/ScreenHeader";
+import { colors } from "@/constants/colors";
+
+type VerificationState = "idle" | "verifying" | "verified";
+
+type VerificationScreenProps = {
+  step?: string;
+  title: string;
+  description: string;
+  verificationDescription: string;
+  verifiedTitle?: string;
+  onContinue: () => void;
+  onManualVerification?: () => void;
+};
+
+export default function VerificationScreen({
+  step,
+  title,
+  description,
+  verificationDescription,
+  verifiedTitle = "Din identitet är verifierad",
+  onContinue,
+  onManualVerification,
+}: VerificationScreenProps) {
+  const [state, setState] = useState<VerificationState>("idle");
+
+  const verificationTimer =
+    useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (verificationTimer.current !== null) {
+        clearTimeout(verificationTimer.current);
+        verificationTimer.current = null;
+      }
+    };
+  }, []);
+
+  const verify = () => {
+    if (verificationTimer.current !== null || state === "verified") {
+      return;
+    }
+
+    setState("verifying");
+
+    // Simulerad verifiering tills riktig BankID-integration finns.
+    verificationTimer.current = setTimeout(() => {
+      verificationTimer.current = null;
+      setState("verified");
+    }, 1400);
+  };
+
+  const handleContinue = () => {
+    if (state !== "verified") return;
+
+    onContinue();
+  };
+
+  const isVerifying = state === "verifying";
+  const isVerified = state === "verified";
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScreenHeader step={step} />
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.description}>{description}</Text>
+        </View>
+
+        <View
+          style={styles.verification}
+          accessibilityLiveRegion="polite"
+        >
+          <View
+            style={[
+              styles.iconCircle,
+              isVerified && styles.iconCircleVerified,
+            ]}
+          >
+            {isVerified ? (
+              <Check
+                size={64}
+                color={colors.success}
+                strokeWidth={2.5}
+              />
+            ) : (
+              <ShieldCheck
+                size={72}
+                color={colors.primary}
+                strokeWidth={1.6}
+              />
+            )}
+          </View>
+
+          <Text style={styles.verificationTitle}>
+            {isVerified
+              ? verifiedTitle
+              : isVerifying
+                ? "Väntar på BankID"
+                : "Identifiera dig med BankID"}
+          </Text>
+
+          <Text style={styles.verificationDescription}>
+            {isVerified
+              ? "Du kan nu fortsätta registreringen."
+              : isVerifying
+                ? "Identifieringen pågår..."
+                : verificationDescription}
+          </Text>
+        </View>
+      </ScrollView>
+
+      <View style={styles.bottom}>
+        {isVerified ? (
+          <PrimaryButton
+            title="Fortsätt"
+            onPress={handleContinue}
+          />
+        ) : (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              isVerifying ? "Väntar på BankID" : "Öppna BankID"
+            }
+            accessibilityState={{
+              disabled: isVerifying,
+              busy: isVerifying,
+            }}
+            disabled={isVerifying}
+            onPress={verify}
+            style={({ pressed }) => [
+              styles.verifyButton,
+              pressed && styles.pressed,
+              isVerifying && styles.disabled,
+            ]}
+          >
+            {isVerifying && (
+              <ActivityIndicator color={colors.surface} />
+            )}
+
+            <Text style={styles.verifyButtonText}>
+              {isVerifying ? "Väntar på BankID..." : "Öppna BankID"}
+            </Text>
+          </Pressable>
+        )}
+
+        {onManualVerification && !isVerified && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ disabled: isVerifying }}
+            disabled={isVerifying}
+            onPress={onManualVerification}
+            style={({ pressed }) => [
+              styles.manualButton,
+              pressed && styles.pressed,
+              isVerifying && styles.disabled,
+            ]}
+          >
+            <Text style={styles.manualButtonText}>
+              Fortsätt utan BankID
+            </Text>
+          </Pressable>
+        )}
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+
+  scrollView: {
+    flex: 1,
+  },
+
+  content: {
+    flexGrow: 1,
+    paddingHorizontal: 28,
+    paddingTop: 32,
+    paddingBottom: 28,
+  },
+
+  title: {
+    maxWidth: 320,
+    fontSize: 31,
+    lineHeight: 39,
+    fontWeight: "700",
+    color: colors.text,
+  },
+
+  description: {
+    marginTop: 10,
+    fontSize: 16,
+    lineHeight: 23,
+    color: colors.textSecondary,
+  },
+
+  verification: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 44,
+    paddingBottom: 44,
+  },
+
+  iconCircle: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#DCEAF3",
+    marginBottom: 28,
+  },
+
+  iconCircleVerified: {
+    backgroundColor: colors.successBackground,
+  },
+
+  verificationTitle: {
+    maxWidth: 300,
+    textAlign: "center",
+    fontSize: 22,
+    lineHeight: 29,
+    fontWeight: "700",
+    color: colors.text,
+  },
+
+  verificationDescription: {
+    maxWidth: 290,
+    marginTop: 10,
+    textAlign: "center",
+    fontSize: 16,
+    lineHeight: 24,
+    color: colors.textSecondary,
+  },
+
+  bottom: {
+    paddingHorizontal: 28,
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
+
+  verifyButton: {
+    width: "100%",
+    minHeight: 58,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderRadius: 14,
+    backgroundColor: colors.primary,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+  },
+
+  verifyButtonText: {
+    flexShrink: 1,
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "700",
+    color: colors.surface,
+  },
+
+  manualButton: {
+    minHeight: 48,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+
+  manualButtonText: {
+    textAlign: "center",
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.primary,
+  },
+
+  pressed: {
+    opacity: 0.82,
+  },
+
+  disabled: {
+    opacity: 0.7,
+  },
+});
