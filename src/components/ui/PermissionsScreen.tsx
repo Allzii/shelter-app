@@ -3,16 +3,16 @@ import * as Notifications from "expo-notifications";
 import { Bell, Check, MapPin, type LucideIcon } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    AppState,
-    Linking,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  AppState,
+  Linking,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -34,6 +34,7 @@ type PermissionsScreenProps = {
   notificationDescription: string;
   buttonTitle: string;
   onContinue: () => void;
+  showLocation?: boolean;
 };
 
 function notificationsAllowed(
@@ -53,6 +54,7 @@ export default function PermissionsScreen({
   notificationDescription,
   buttonTitle,
   onContinue,
+  showLocation = true,
 }: PermissionsScreenProps) {
   const [locationState, setLocationState] =
     useState<PermissionState>("idle");
@@ -71,14 +73,19 @@ export default function PermissionsScreen({
 
       const [locationResult, notificationResult] =
         await Promise.allSettled([
-          Location.getForegroundPermissionsAsync(),
+          showLocation
+            ? Location.getForegroundPermissionsAsync()
+            : Promise.resolve(null),
           Notifications.getPermissionsAsync(),
         ]);
 
       if (!active || check !== latestCheck) return;
 
-      if (!requestingLocation.current) {
-        if (locationResult.status === "fulfilled") {
+      if (showLocation && !requestingLocation.current) {
+        if (
+          locationResult.status === "fulfilled" &&
+          locationResult.value
+        ) {
           const permission = locationResult.value;
 
           setLocationState(
@@ -122,10 +129,10 @@ export default function PermissionsScreen({
       active = false;
       subscription.remove();
     };
-  }, []);
+  }, [showLocation]);
 
   const requestLocation = async () => {
-    if (requestingLocation.current) return;
+    if (!showLocation || requestingLocation.current) return;
 
     requestingLocation.current = true;
     setLocationState("requesting");
@@ -189,13 +196,14 @@ export default function PermissionsScreen({
     }
   };
 
-  // Restore this check after testing:
+  // Återaktivera valideringen efter testning:
   // const isComplete =
-  //   locationState === "granted" &&
+  //   (!showLocation || locationState === "granted") &&
   //   notificationState === "granted";
 
   const handleContinue = () => {
     // if (!isComplete) return;
+
     onContinue();
   };
 
@@ -208,22 +216,26 @@ export default function PermissionsScreen({
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Notiser och position</Text>
+        <Text style={styles.title}>
+          {showLocation ? "Notiser och position" : "Notiser"}
+        </Text>
 
         <Text style={styles.description}>{description}</Text>
 
         <View style={styles.settings}>
-          <PermissionRow
-            icon={MapPin}
-            title="Position"
-            description={getPermissionDescription(
-              locationState,
-              "Platsbehörighet",
-              locationDescription
-            )}
-            state={locationState}
-            onPress={() => void requestLocation()}
-          />
+          {showLocation && (
+            <PermissionRow
+              icon={MapPin}
+              title="Position"
+              description={getPermissionDescription(
+                locationState,
+                "Platsbehörighet",
+                locationDescription
+              )}
+              state={locationState}
+              onPress={() => void requestLocation()}
+            />
+          )}
 
           <PermissionRow
             icon={Bell}
@@ -269,7 +281,7 @@ function showPermissionDenied(
 
   Alert.alert(
     "Öppna Inställningar",
-    `Tillåt ${permissionName} för TryggNära i telefonens inställningar.`,
+    `Tillåt ${permissionName} för appen i telefonens inställningar.`,
     [
       { text: "Avbryt", style: "cancel" },
       {
@@ -278,7 +290,7 @@ function showPermissionDenied(
           void Linking.openSettings().catch(() => {
             Alert.alert(
               "Kunde inte öppna Inställningar",
-              "Öppna telefonens inställningar och välj TryggNära."
+              "Öppna telefonens inställningar och välj appen."
             );
           });
         },
@@ -343,7 +355,7 @@ function PermissionRow({
   return (
     <View style={[styles.settingRow, isLast && styles.lastSettingRow]}>
       <View style={styles.settingIcon}>
-        <Icon size={22} color= {colors.primary} />
+        <Icon size={22} color={colors.primary} />
       </View>
 
       <View style={styles.settingText}>
@@ -368,9 +380,9 @@ function PermissionRow({
         ]}
       >
         {isRequesting ? (
-          <ActivityIndicator size="small" color= {colors.primary } />
+          <ActivityIndicator size="small" color={colors.primary} />
         ) : isGranted ? (
-          <Check size={18} color= {colors.success} strokeWidth={3} />
+          <Check size={18} color={colors.success} strokeWidth={3} />
         ) : (
           <Text
             style={[
@@ -391,17 +403,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-
   scrollView: {
     flex: 1,
   },
-
   content: {
     paddingHorizontal: 28,
     paddingTop: 32,
     paddingBottom: 25,
   },
-
   title: {
     maxWidth: 320,
     fontSize: 31,
@@ -409,21 +418,18 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: colors.text,
   },
-
   description: {
     marginTop: 9,
     fontSize: 16,
     lineHeight: 23,
     color: colors.textSecondary,
   },
-
   settings: {
     marginTop: 30,
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: colors.border,
   },
-
   settingRow: {
     minHeight: 94,
     paddingVertical: 14,
@@ -432,11 +438,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-
   lastSettingRow: {
     borderBottomWidth: 0,
   },
-
   settingIcon: {
     width: 40,
     height: 40,
@@ -446,25 +450,21 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     marginRight: 12,
   },
-
   settingText: {
     flex: 1,
     paddingRight: 10,
   },
-
   settingTitle: {
     fontSize: 16,
     fontWeight: "700",
     color: colors.text,
   },
-
   settingDescription: {
     marginTop: 3,
     fontSize: 12,
     lineHeight: 17,
     color: colors.textSecondary,
   },
-
   permissionButton: {
     minWidth: 62,
     minHeight: 44,
@@ -475,38 +475,31 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#DCEAF1",
   },
-
   permissionButtonGranted: {
     minWidth: 44,
     paddingHorizontal: 9,
     backgroundColor: colors.successBackground,
   },
-
   permissionButtonDenied: {
     backgroundColor: colors.errorBackground,
   },
-
   permissionButtonText: {
     fontSize: 14,
     fontWeight: "700",
     color: colors.primary,
   },
-
   permissionButtonRetryText: {
     color: colors.error,
   },
-
   pressed: {
     opacity: 0.7,
   },
-
   infoText: {
     marginTop: 18,
     fontSize: 13,
     lineHeight: 19,
     color: "#6F7D8B",
   },
-
   bottom: {
     paddingHorizontal: 28,
     paddingTop: 12,

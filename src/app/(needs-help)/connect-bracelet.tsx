@@ -1,195 +1,79 @@
-import { Bluetooth, Check, ChevronRight } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
+import { Wifi } from "lucide-react-native";
 import {
-  ActivityIndicator,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  View
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors } from "@/constants/colors";
 import ScreenHeader from "@/components/ui/ScreenHeader";
-
-type ConnectionState = "idle" | "searching" | "connected";
+import { colors } from "@/constants/colors";
 
 export default function ConnectBraceletScreen() {
-  const [connectionState, setConnectionState] =
-    useState<ConnectionState>("idle");
-
-  const searchTimer =
-    useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (searchTimer.current !== null) {
-        clearTimeout(searchTimer.current);
-        searchTimer.current = null;
-      }
-    };
-  }, []);
-
-  const handleConnect = () => {
-    if (
-      searchTimer.current !== null ||
-      connectionState === "connected"
-    ) {
-      return;
-    }
-    
-    setConnectionState("searching");
-
-    searchTimer.current = setTimeout(() => {
-      searchTimer.current = null;
-      setConnectionState("connected");
-    }, 1400);
-  };
-
-  const isSearching = connectionState === "searching";
-  const isConnected = connectionState === "connected";
-
   return (
     <SafeAreaView style={styles.container}>
       <ScreenHeader step="Steg 5 av 5" />
 
       <ScrollView
-        style={styles.scrollView}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.title}>Koppla armbandet</Text>
 
         <Text style={styles.description}>
-          Armbandet behöver vara nära telefonen när du ansluter det.
+          Armbandet används för att be om hjälp.
         </Text>
 
-        <Text style={styles.sectionTitle}>Gör så här</Text>
-
-        <View style={styles.steps}>
-          <Instruction number="1" text="Slå på armbandet." />
-
-          <Instruction
-            number="2"
-            text="Håll knappen intryckt tills lampan blinkar."
-          />
-
-          <Instruction
-            number="3"
-            text="Tryck på Sök efter armband."
-            isLast
-          />
-        </View>
-
-        <View
-          style={styles.statusRow}
-          accessibilityLiveRegion="polite"
-        >
+        <View style={styles.main}>
           <View
-            style={[
-              styles.statusIcon,
-              isConnected && styles.statusIconConnected,
-            ]}
+            style={styles.illustration}
+            accessible={false}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
           >
-            {isConnected ? (
-              <Check size={21} color={colors.surface} strokeWidth={3} />
-            ) : (
-              <Bluetooth size={21} color={colors.primary} />
-            )}
+            <View style={styles.braceletShadow} />
+
+            <View style={styles.bracelet}>
+              <View style={styles.topStrap}>
+                <View style={styles.strapLine} />
+                <View style={styles.strapLine} />
+              </View>
+
+              <View style={styles.braceletBody}>
+                <View style={styles.braceletFace}>
+                  <View style={styles.braceletButton}>
+                    <View style={styles.buttonHighlight} />
+                  </View>
+
+                  <View style={styles.indicator} />
+                </View>
+              </View>
+
+              <View style={styles.bottomStrap}>
+                <View style={styles.strapHole} />
+                <View style={styles.strapHole} />
+                <View style={styles.strapHole} />
+              </View>
+            </View>
+
+            <View style={styles.wifiBadge}>
+              <Wifi
+                size={24}
+                color={colors.primary}
+                strokeWidth={2}
+              />
+            </View>
           </View>
 
-          <View style={styles.statusText}>
-            <Text style={styles.statusTitle}>
-              {isSearching
-                ? "Söker efter armband"
-                : isConnected
-                  ? "TryggNära-armband anslutet"
-                  : "Inget armband anslutet"}
-            </Text>
+          <Text style={styles.braceletTitle}>Ditt armband</Text>
 
-            <Text style={styles.statusDescription}>
-              {isSearching
-                ? "Håll armbandet nära telefonen"
-                : isConnected
-                  ? "Anslutningen fungerar"
-                  : "Sök efter ditt TryggNära-armband"}
-            </Text>
-          </View>
+          <Text style={styles.braceletDescription}>
+            Här kommer du att kunna koppla ditt armband.
+          </Text>
         </View>
       </ScrollView>
-
-      <View style={styles.bottom}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={
-            isSearching
-              ? "Söker efter armband"
-              : isConnected
-                ? "Klart"
-                : "Sök efter armband"
-          }
-          accessibilityState={{
-            disabled: isSearching,
-            busy: isSearching,
-          }}
-          disabled={isSearching}
-          onPress={handleConnect}
-          style={({ pressed }) => [
-            styles.primaryButton,
-            isConnected && styles.connectedButton,
-            pressed && styles.buttonPressed,
-            isSearching && styles.buttonDisabled,
-          ]}
-        >
-          {isSearching ? (
-            <ActivityIndicator color={colors.surface} />
-          ) : (
-            <>
-              <Text style={styles.primaryButtonText}>
-                {isConnected ? "Klart" : "Sök efter armband"}
-              </Text>
-
-              {isConnected ? (
-                <Check
-                  size={22}
-                  color={colors.surface}
-                  style={styles.buttonIcon}
-                />
-              ) : (
-                <ChevronRight
-                  size={22}
-                  color={colors.surface}
-                  style={styles.buttonIcon}
-                />
-              )}
-            </>
-          )}
-        </Pressable>
-      </View>
     </SafeAreaView>
-  );
-}
-
-type InstructionProps = {
-  number: string;
-  text: string;
-  isLast?: boolean;
-};
-
-function Instruction({
-  number,
-  text,
-  isLast = false,
-}: InstructionProps) {
-  return (
-    <View style={[styles.stepRow, isLast && styles.lastStepRow]}>
-      <View style={styles.stepNumber}>
-        <Text style={styles.stepNumberText}>{number}</Text>
-      </View>
-
-      <Text style={styles.stepText}>{text}</Text>
-    </View>
   );
 }
 
@@ -199,15 +83,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 
-  scrollView: {
-    flex: 1,
-  },
-
   content: {
     flexGrow: 1,
     paddingHorizontal: 28,
     paddingTop: 32,
-    paddingBottom: 24,
+    paddingBottom: 28,
   },
 
   title: {
@@ -218,137 +98,157 @@ const styles = StyleSheet.create({
   },
 
   description: {
-    maxWidth: 330,
     marginTop: 10,
     fontSize: 16,
     lineHeight: 23,
     color: colors.textSecondary,
   },
 
-  sectionTitle: {
-    marginTop: 34,
-    marginBottom: 4,
-    fontSize: 17,
-    fontWeight: "700",
-    color: colors.text,
-  },
-
-  steps: {
-    width: "100%",
-  },
-
-  stepRow: {
-    minHeight: 58,
-    paddingVertical: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-
-  lastStepRow: {
-    borderBottomWidth: 0,
-  },
-
-  stepNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+  main: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#E3F2F3",
-    marginRight: 13,
+    paddingTop: 40,
+    paddingBottom: 60,
   },
 
-  stepNumberText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: colors.primary,
-  },
-
-  stepText: {
-    flex: 1,
-    fontSize: 15,
-    lineHeight: 21,
-    color: colors.text,
-  },
-
-  statusRow: {
-    marginTop: 30,
-    flexDirection: "row",
+  illustration: {
+    width: 250,
+    height: 240,
     alignItems: "center",
+    justifyContent: "center",
   },
 
-  statusIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 13,
+  bracelet: {
+    alignItems: "center",
+    transform: [{ rotate: "-14deg" }],
+  },
+
+  topStrap: {
+    width: 65,
+    height: 61,
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    backgroundColor: "#234D72",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  strapLine: {
+    width: 37,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: "#416D90",
+  },
+
+  braceletBody: {
+    width: 110,
+    height: 108,
+    borderRadius: 32,
+    padding: 7,
+    backgroundColor: "#173B5A",
+    shadowColor: "#142235",
+    shadowOffset: { width: 4, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+
+  braceletFace: {
+    flex: 1,
+    borderRadius: 26,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#315F84",
+    borderWidth: 1,
+    borderColor: "#527C9C",
+  },
+
+  braceletButton: {
+    width: 53,
+    height: 53,
+    borderRadius: 27,
+    backgroundColor: "#E8F0F5",
+    borderWidth: 4,
+    borderColor: "#C2D6E4",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  buttonHighlight: {
+    width: 29,
+    height: 29,
+    borderRadius: 15,
+    backgroundColor: colors.surface,
+  },
+
+  indicator: {
+    position: "absolute",
+    bottom: 10,
+    width: 5,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: "#94B0C5",
+  },
+
+  bottomStrap: {
+    width: 65,
+    height: 61,
+    borderBottomLeftRadius: 22,
+    borderBottomRightRadius: 22,
+    backgroundColor: "#234D72",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+  },
+
+  strapHole: {
+    width: 15,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#173B5A",
+  },
+
+  braceletShadow: {
+    position: "absolute",
+    bottom: 3,
+    width: 125,
+    height: 13,
+    borderRadius: 70,
+    backgroundColor: "#254F75",
+    opacity: 0.09,
+  },
+
+  wifiBadge: {
+    position: "absolute",
+    top: 37,
+    right: 30,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.surface,
-    marginRight: 12,
+    borderWidth: 1,
+    borderColor: "#DCE7EE",
   },
 
-  statusIconConnected: {
-    backgroundColor: colors.primary,
-  },
-
-  statusText: {
-    flex: 1,
-  },
-
-  statusTitle: {
-    fontSize: 16,
-    lineHeight: 21,
+  braceletTitle: {
+    marginTop: 24,
+    textAlign: "center",
+    fontSize: 21,
+    lineHeight: 28,
     fontWeight: "700",
     color: colors.text,
   },
 
-  statusDescription: {
-    marginTop: 3,
-    fontSize: 13,
-    lineHeight: 18,
-    color: colors.textSecondary,
-  },
-
-  bottom: {
-    paddingHorizontal: 28,
-    paddingTop: 12,
-    paddingBottom: 12,
-  },
-
-  primaryButton: {
-    width: "100%",
-    minHeight: 58,
-    paddingHorizontal: 48,
-    paddingVertical: 16,
-    borderRadius: 14,
-    backgroundColor: colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  connectedButton: {
-    backgroundColor: colors.success,
-  },
-
-  buttonPressed: {
-    opacity: 0.82,
-  },
-
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-
-  primaryButtonText: {
+  braceletDescription: {
+    maxWidth: 290,
+    marginTop: 10,
     textAlign: "center",
-    color: colors.surface,
-    fontSize: 18,
-    fontWeight: "700",
-  },
-
-  buttonIcon: {
-    position: "absolute",
-    right: 22,
+    fontSize: 16,
+    lineHeight: 24,
+    color: colors.textSecondary,
   },
 });
