@@ -1,7 +1,9 @@
+import { router } from "expo-router";
 import { Award, Check } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,7 +24,11 @@ export default function HelperCertificationScreen() {
   const [status, setStatus] = useState<CertificationStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [logoutMessage, setLogoutMessage] = useState("");
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const logoutLock = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -82,6 +88,29 @@ export default function HelperCertificationScreen() {
       isMounted = false;
     };
   }, [loadAttempt]);
+
+  const handleLogout = async () => {
+    if (logoutLock.current) return;
+
+    logoutLock.current = true;
+    setIsLoggingOut(true);
+    setLogoutMessage("");
+
+    try {
+      const { error } = await supabase.auth.signOut({
+        scope: "local",
+      });
+
+      if (error) throw error;
+
+      router.replace("/");
+    } catch {
+      setLogoutMessage("Kunde inte logga ut. Försök igen.");
+    } finally {
+      logoutLock.current = false;
+      setIsLoggingOut(false);
+    }
+  };
 
   const isCertified =
     status !== null &&
@@ -182,6 +211,7 @@ export default function HelperCertificationScreen() {
         {message !== "" ? (
           <PrimaryButton
             title="Försök igen"
+            disabled={isLoggingOut}
             onPress={() => setLoadAttempt((current) => current + 1)}
           />
         ) : (
@@ -191,6 +221,42 @@ export default function HelperCertificationScreen() {
             onPress={() => {}}
           />
         )}
+
+        {logoutMessage !== "" && (
+          <Text
+            style={styles.logoutMessage}
+            accessibilityLiveRegion="polite"
+          >
+            {logoutMessage}
+          </Text>
+        )}
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Logga ut"
+          accessibilityState={{
+            disabled: isLoggingOut,
+            busy: isLoggingOut,
+          }}
+          disabled={isLoggingOut}
+          onPress={() => void handleLogout()}
+          style={({ pressed }) => [
+            styles.logoutButton,
+            pressed && styles.pressed,
+            isLoggingOut && styles.disabled,
+          ]}
+        >
+          {isLoggingOut && (
+            <ActivityIndicator
+              size="small"
+              color={colors.primary}
+            />
+          )}
+
+          <Text style={styles.logoutText}>
+            {isLoggingOut ? "Loggar ut..." : "Logga ut"}
+          </Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -383,5 +449,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     paddingTop: 12,
     paddingBottom: 12,
+  },
+
+  logoutButton: {
+    minHeight: 48,
+    paddingVertical: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  logoutText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.primary,
+  },
+
+  logoutMessage: {
+    marginTop: 12,
+    textAlign: "center",
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.error,
+  },
+
+  pressed: {
+    opacity: 0.75,
+  },
+
+  disabled: {
+    opacity: 0.5,
   },
 });
