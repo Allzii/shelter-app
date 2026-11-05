@@ -34,11 +34,6 @@ export default function NeedsHelpPermissionsScreen() {
     <PermissionsScreen
       step="Steg 4 av 5"
       showLocation={!isOtherPerson}
-      description={
-        isOtherPerson
-          ? "Tillåt notiser på din telefon för att kunna få uppdateringar om personen du registrerar."
-          : "Notiser meddelar dig när en hjälpare svarar. Platsbehörigheten gäller telefonens position."
-      }
       locationDescription="Ger appen tillgång till telefonens position"
       notificationDescription={
         isOtherPerson

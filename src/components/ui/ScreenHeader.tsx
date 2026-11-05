@@ -6,11 +6,17 @@ import { colors } from "@/constants/colors";
 
 type ScreenHeaderProps = {
   step?: string;
+  onBack?: () => void;
+  backDisabled?: boolean;
 };
 
-export default function ScreenHeader({ step }: ScreenHeaderProps) {
+export default function ScreenHeader({
+  step,
+  onBack,
+  backDisabled = false,
+}: ScreenHeaderProps) {
   const navigation = useNavigation();
-  const canGoBack = navigation.canGoBack();
+  const canGoBack = Boolean(onBack) || navigation.canGoBack();
 
   const currentStep = step ? Number(step.match(/\d+/)?.[0]) : 0;
   const totalSteps = step ? Number(step.match(/\d+$/)?.[0]) : 0;
@@ -21,6 +27,11 @@ export default function ScreenHeader({ step }: ScreenHeaderProps) {
       : 0;
 
   const handleBack = () => {
+    if (backDisabled) return;
+    if (onBack) {
+      onBack();
+      return;
+    }
     if (router.canGoBack()) {
       router.back();
     }
@@ -34,6 +45,8 @@ export default function ScreenHeader({ step }: ScreenHeaderProps) {
             accessibilityRole="button"
             accessibilityLabel="Gå tillbaka"
             onPress={handleBack}
+            disabled={backDisabled}
+            accessibilityState={{ disabled: backDisabled }}
             style={({ pressed }) => [
               styles.backButton,
               pressed && styles.pressed,
@@ -51,12 +64,7 @@ export default function ScreenHeader({ step }: ScreenHeaderProps) {
 
       {totalSteps > 0 && (
         <View style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressValue,
-              { width: `${progress}%` },
-            ]}
-          />
+          <View style={[styles.progressValue, { width: `${progress}%` }]} />
         </View>
       )}
     </View>

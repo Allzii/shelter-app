@@ -30,13 +30,8 @@ export default function NeedsHelpVerificationScreen() {
       }
       description={
         isOtherPerson
-          ? "BankID ska tillhöra personen som ska använda armbandet. Saknar personen BankID kan ni fortsätta med registreringen inför en manuell kontroll."
-          : "Identifiera dig med BankID. Saknar du BankID kan du fortsätta med registreringen inför en manuell kontroll."
-      }
-      verificationDescription={
-        isOtherPerson
-          ? "Personen behöver själv identifiera sig med sitt BankID."
-          : "BankID bekräftar vem du är."
+          ? "Personen som ska få hjälp identifierar sig med sitt eget BankID."
+          : "Identifiera dig med BankID för att registrera dig."
       }
       verifiedTitle={
         isOtherPerson

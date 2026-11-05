@@ -1,0 +1,133 @@
+<div id="recipient-directions" class="viz-carousel viz-dotted-background" aria-label="Tre riktningar för startsidan" data-previous-label="Föregående" data-next-label="Nästa">
+  <section data-variant="Genvägar" aria-label="Genvägar">
+    <div class="rh-phone rh-shortcuts">
+      <div class="rh-status"><span>20:41</span><span><i data-lucide="signal"></i><i data-lucide="battery-full"></i></span></div>
+      <main class="rh-main">
+        <header class="rh-header"><div><p class="rh-date">TORSDAG 15 OKTOBER</p><h1>God kväll!</h1></div><span class="rh-avatar"><i data-lucide="user-round"></i></span></header>
+        <p class="rh-intro">Vad vill du kika på?</p>
+        <div class="rh-tile-grid">
+          <button class="rh-tile cursor-interaction" data-detail="bracelet"><i data-lucide="watch"></i><span>Ditt<br>armband</span><i data-lucide="arrow-up-right"></i></button>
+          <button class="rh-tile cursor-interaction" data-detail="map"><i data-lucide="map-pin"></i><span>Hitta<br>skyddsrum</span><i data-lucide="arrow-up-right"></i></button>
+        </div>
+        <div class="rh-quiet-note"><i data-lucide="info"></i><div><h3>Så ber du om hjälp</h3><p>Håll in knappen på ditt armband när du behöver hjälp.</p></div></div>
+      </main>
+      <nav class="rh-nav" aria-label="Förhandsvisning av navigation"><span class="rh-active"><i data-lucide="house"></i>Hem</span><span><i data-lucide="watch"></i>Armband</span><span><i data-lucide="user-round"></i>Profil</span></nav>
+    </div>
+  </section>
+  <section data-variant="Steg för steg" aria-label="Steg för steg" hidden>
+    <div class="rh-phone rh-steps">
+      <div class="rh-status"><span>20:41</span><span><i data-lucide="signal"></i><i data-lucide="battery-full"></i></span></div>
+      <main class="rh-main">
+        <header class="rh-header"><div><p class="rh-date">TORSDAG 15 OKTOBER</p><h1>God kväll!</h1></div></header>
+        <div class="rh-process"><h2>När du behöver hjälp</h2><div class="rh-step"><span>1</span><div><h3>Håll in knappen</h3><p>På ditt armband.</p></div></div><div class="rh-step"><span>2</span><div><h3>En förfrågan skickas</h3><p>Du ber om hjälp via armbandet.</p></div></div><div class="rh-step"><span>3</span><div><h3>En hjälpare kan möta dig</h3><p>Och hjälpa dig vidare.</p></div></div></div>
+        <div class="rh-link-list"><button class="cursor-interaction" data-detail="bracelet"><i data-lucide="watch"></i><span>Ditt armband</span><i data-lucide="chevron-right"></i></button><button class="cursor-interaction" data-detail="map"><i data-lucide="map-pin"></i><span>Skyddsrumskartan</span><i data-lucide="arrow-up-right"></i></button></div>
+      </main>
+      <nav class="rh-nav" aria-label="Förhandsvisning av navigation"><span class="rh-active"><i data-lucide="house"></i>Hem</span><span><i data-lucide="watch"></i>Armband</span><span><i data-lucide="user-round"></i>Profil</span></nav>
+    </div>
+  </section>
+  <section data-variant="Armbandet i fokus" aria-label="Armbandet i fokus" hidden>
+    <div class="rh-phone rh-device">
+      <div class="rh-status"><span>20:41</span><span><i data-lucide="signal"></i><i data-lucide="battery-full"></i></span></div>
+      <main class="rh-main">
+        <header class="rh-header"><div><p class="rh-date">TORSDAG 15 OKTOBER</p><h1>God kväll!</h1></div></header>
+        <div class="rh-device-section"><div class="rh-device-heading"><i data-lucide="watch"></i><h2>Ditt armband</h2></div><p>Håll in knappen för att be om hjälp.</p><button class="rh-inline-link cursor-interaction" data-detail="bracelet">Visa armbandet <i data-lucide="arrow-right"></i></button></div>
+        <button class="rh-map-row cursor-interaction" data-detail="map"><span class="rh-map-symbol"><i data-lucide="map-pin"></i></span><span><strong>Var finns skyddsrummen?</strong><small>Öppna skyddsrumskartan</small></span><i data-lucide="arrow-up-right"></i></button>
+      </main>
+      <nav class="rh-nav" aria-label="Förhandsvisning av navigation"><span class="rh-active"><i data-lucide="house"></i>Hem</span><span><i data-lucide="watch"></i>Armband</span><span><i data-lucide="user-round"></i>Profil</span></nav>
+    </div>
+  </section>
+</div>
+<style>
+  #recipient-directions section { padding: 22px 12px; min-height: 660px; box-sizing: border-box; }
+  #recipient-directions .rh-phone { --rh-bg:#EEF4F7; --rh-blue:#2F6591; --rh-text:#142235; --rh-muted:#607080; --rh-line:#D5DEE5; --rh-white:#fff; width:min(100%,350px); min-height:610px; margin:auto; background:var(--rh-bg); color:var(--rh-text); border-radius:32px; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; display:flex; flex-direction:column; box-shadow:0 12px 40px #14223512; position:relative; }
+  #recipient-directions .rh-phone * { box-sizing:border-box; }
+  #recipient-directions .rh-status { display:flex; justify-content:space-between; align-items:center; padding:19px 25px 12px; font-size:12px; font-weight:600; }
+  #recipient-directions .rh-status>span:last-child { display:flex; gap:6px; }
+  #recipient-directions .rh-status svg { width:16px; height:16px; }
+  #recipient-directions .rh-main { flex:1; padding:23px 24px 30px; }
+  #recipient-directions .rh-header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  #recipient-directions .rh-date { margin:0 0 9px; font-size:10px; line-height:16px; font-weight:600; letter-spacing:1px; color:var(--rh-muted); }
+  #recipient-directions h1 { margin:0; font-size:31px; line-height:39px; font-weight:650; letter-spacing:-1px; color:var(--rh-text); }
+  #recipient-directions h2 { margin:0; font-size:21px; line-height:28px; font-weight:600; letter-spacing:-.5px; color:var(--rh-text); }
+  #recipient-directions h3 { margin:0; font-size:14px; line-height:22px; font-weight:600; color:var(--rh-text); }
+  #recipient-directions p { font-size:14px; line-height:22px; color:var(--rh-muted); }
+  #recipient-directions button { font:inherit; color:inherit; text-align:left; }
+  #recipient-directions button:focus-visible { outline:2px solid var(--rh-blue); outline-offset:4px; }
+  #recipient-directions .rh-avatar { display:flex; align-items:center; justify-content:center; width:38px; height:38px; background:#DFEAF3; color:var(--rh-blue); border-radius:50%; }
+  #recipient-directions .rh-avatar svg { width:19px; height:19px; }
+  #recipient-directions .rh-intro { margin:15px 0 28px; }
+  #recipient-directions .rh-tile-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  #recipient-directions .rh-tile { position:relative; border:0; border-radius:20px; background:var(--rh-white); padding:19px 17px; min-height:158px; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start; gap:22px; }
+  #recipient-directions .rh-tile>svg { width:25px; height:25px; color:var(--rh-blue); stroke-width:1.6; }
+  #recipient-directions .rh-tile>span { font-size:17px; line-height:23px; font-weight:600; letter-spacing:-.3px; }
+  #recipient-directions .rh-tile>svg:last-child { position:absolute; right:14px; bottom:19px; width:17px; height:17px; color:#91A2AF; }
+  #recipient-directions .rh-quiet-note { display:flex; gap:10px; margin-top:34px; }
+  #recipient-directions .rh-quiet-note>svg { width:17px; height:17px; flex-shrink:0; color:var(--rh-muted); margin-top:2px; }
+  #recipient-directions .rh-quiet-note p { margin:5px 0 0; font-size:13px; line-height:21px; }
+  #recipient-directions .rh-nav { background:var(--rh-white); border-top:1px solid #E1E8ED; display:flex; justify-content:space-around; padding:13px 15px 21px; gap:12px; }
+  #recipient-directions .rh-nav span { display:flex; flex-direction:column; align-items:center; gap:5px; font-size:10px; color:var(--rh-muted); min-width:55px; }
+  #recipient-directions .rh-nav svg { width:21px; height:21px; stroke-width:1.7; }
+  #recipient-directions .rh-nav .rh-active { color:var(--rh-blue); }
+  #recipient-directions .rh-process { margin-top:32px; }
+  #recipient-directions .rh-process h2 { margin-bottom:25px; font-size:18px; }
+  #recipient-directions .rh-step { display:flex; gap:14px; position:relative; padding-bottom:24px; }
+  #recipient-directions .rh-step:not(:last-child):before { content:""; position:absolute; left:14px; top:30px; bottom:0; width:1px; background:#C9D9E6; }
+  #recipient-directions .rh-step>span { width:29px; height:29px; display:flex; align-items:center; justify-content:center; border:1px solid #BFCDDA; border-radius:50%; flex-shrink:0; font-size:12px; color:var(--rh-blue); }
+  #recipient-directions .rh-step p { margin:2px 0 0; font-size:12px; line-height:19px; }
+  #recipient-directions .rh-link-list { margin-top:6px; border-top:1px solid var(--rh-line); }
+  #recipient-directions .rh-link-list button { padding:15px 0; width:100%; display:flex; align-items:center; gap:10px; border:0; border-bottom:1px solid var(--rh-line); background:transparent; font-size:14px; }
+  #recipient-directions .rh-link-list button>span { flex:1; }
+  #recipient-directions .rh-link-list svg { width:18px; height:18px; color:var(--rh-blue); }
+  #recipient-directions .rh-device-section { margin-top:43px; padding-bottom:31px; border-bottom:1px solid var(--rh-line); }
+  #recipient-directions .rh-device-heading { display:flex; align-items:center; gap:14px; }
+  #recipient-directions .rh-device-heading>svg { width:35px; height:42px; color:var(--rh-blue); stroke-width:1.4; }
+  #recipient-directions .rh-device-section>p { max-width:235px; margin:20px 0; font-size:17px; line-height:26px; color:var(--rh-text); }
+  #recipient-directions .rh-inline-link { display:flex; align-items:center; gap:16px; padding:7px 0; border:0; background:transparent; color:var(--rh-blue); font-size:14px; font-weight:600; }
+  #recipient-directions .rh-inline-link svg { width:17px; height:17px; }
+  #recipient-directions .rh-map-row { margin-top:28px; width:100%; display:flex; gap:12px; align-items:center; padding:0; border:0; background:transparent; }
+  #recipient-directions .rh-map-row>span:nth-child(2) { flex:1; }
+  #recipient-directions .rh-map-row strong { display:block; font-size:14px; line-height:21px; font-weight:600; }
+  #recipient-directions .rh-map-row small { display:block; margin-top:4px; color:var(--rh-muted); font-size:12px; line-height:19px; }
+  #recipient-directions .rh-map-row>svg { width:18px; height:18px; color:var(--rh-blue); }
+  #recipient-directions .rh-map-symbol { width:39px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:12px; background:var(--rh-white); color:var(--rh-blue); }
+  #recipient-directions .rh-map-symbol svg { width:21px; height:21px; }
+  #recipient-directions .rh-detail { position:absolute; inset:0; z-index:2; background:var(--rh-bg); padding:30px 24px; }
+  #recipient-directions .rh-back { padding:10px 0; margin-bottom:36px; display:flex; align-items:center; gap:7px; border:0; background:transparent; color:var(--rh-blue); font-size:14px; }
+  #recipient-directions .rh-back svg { width:17px; height:17px; }
+  @media(max-width:380px) { #recipient-directions section { padding:12px 0; } #recipient-directions .rh-main { padding-left:20px; padding-right:20px; } }
+</style>
+<script>
+(() => {
+  const root = document.getElementById('recipient-directions');
+  root.querySelectorAll('[data-detail]').forEach(button => {
+    button.addEventListener('click', () => {
+      const phone = button.closest('.rh-phone');
+      const panel = document.createElement('div');
+      panel.className = 'rh-detail';
+      const back = document.createElement('button');
+      back.type = 'button';
+      back.className = 'rh-back cursor-interaction';
+      back.innerHTML = '<i data-lucide="chevron-left" aria-hidden="true"></i>Tillbaka';
+      const heading = document.createElement('h2');
+      const body = document.createElement('p');
+      const isBracelet = button.dataset.detail === 'bracelet';
+      heading.textContent = isBracelet ? 'Ditt armband' : 'Skyddsrumskartan';
+      body.textContent = isBracelet ? 'Håll in knappen på ditt armband för att be om hjälp.' : 'Här öppnas myndighetens karta över skyddsrum i den färdiga appen.';
+      panel.append(back, heading, body);
+      phone.append(panel);
+      back.addEventListener('click', () => { panel.remove(); button.focus(); });
+      back.focus();
+      if (globalThis.lucide) lucide.createIcons();
+    });
+  });
+  if (globalThis.Tweak) {
+    root.querySelectorAll('.rh-phone').forEach(phone => {
+      const settings = { rounded: 20 };
+      const tweak = new Tweak({ container: phone, onChange: () => {
+        phone.querySelectorAll('.rh-tile').forEach(tile => tile.style.borderRadius = settings.rounded + 'px');
+      } });
+      if (phone.querySelector('.rh-tile')) tweak.addSlider(settings, 'rounded', { label: 'Rundning på genvägar', min: 8, max: 28, unit: 'px' });
+    });
+  }
+})();
+</script>

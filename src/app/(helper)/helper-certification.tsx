@@ -1,12 +1,20 @@
-import { router } from "expo-router";
-import { Award, Check } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import {
+  Award,
+  Check,
+  Clock,
+  FileText,
+  Users,
+} from "lucide-react-native";
+import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,79 +23,109 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import { colors } from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
 
-type CertificationStatus = {
-  identityVerified: boolean;
-  trainingCompleted: boolean;
+type Certificate = {
+  status: "pending" | "approved" | "needs_changes";
+  review_note: string | null;
 };
 
 export default function HelperCertificationScreen() {
-  const [status, setStatus] = useState<CertificationStatus | null>(null);
+  const [certificate, setCertificate] =
+    useState<Certificate | null>(null);
+
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState("");
-  const [logoutMessage, setLogoutMessage] = useState("");
   const [loadAttempt, setLoadAttempt] = useState(0);
+
+  const [warningVisible, setWarningVisible] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutMessage, setLogoutMessage] = useState("");
 
   const logoutLock = useRef(false);
+  const { height, fontScale } = useWindowDimensions();
 
-  useEffect(() => {
-    let isMounted = true;
+  const isCompact = height < 740 || fontScale > 1.2;
+  const isApproved = certificate?.status === "approved";
+  const isPending = certificate?.status === "pending";
+  const needsChanges = certificate?.status === "needs_changes";
 
-    const loadCertification = async () => {
-      setIsLoading(true);
-      setMessage("");
-      setStatus(null);
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
 
-      try {
-        const { data: authData, error: authError } =
-          await supabase.auth.getUser();
+      const loadCertification = async () => {
+        setIsLoading(true);
+        setMessage("");
+        setProfileLoaded(false);
+        setCertificate(null);
 
-        if (authError || !authData.user) {
-          throw new Error("Session unavailable");
-        }
+        try {
+          const { data: authData, error: authError } =
+            await supabase.auth.getUser();
 
-        const { data, error } = await supabase
-          .from("helper_profiles")
-          .select("training_status, training_demo_completed")
-          .eq("account_id", authData.user.id)
-          .maybeSingle();
+          if (authError || !authData.user) {
+            throw new Error("Session unavailable");
+          }
 
-        if (error) throw error;
-        if (!isMounted) return;
+          const { data: profile, error: profileError } =
+            await supabase
+              .from("helper_profiles")
+              .select("account_id")
+              .eq("account_id", authData.user.id)
+              .maybeSingle();
 
-        if (!data) {
+          if (profileError) throw profileError;
+          if (!active) return;
+
+          if (!profile) {
+            setMessage(
+              "Din volontärprofil saknas. Gå tillbaka och spara dina uppgifter på Om dig."
+            );
+            return;
+          }
+
+          const { data, error } = await supabase
+            .from("helper_certificates")
+            .select("status, review_note")
+            .eq("account_id", authData.user.id)
+            .maybeSingle();
+
+          if (error) throw error;
+          if (!active) return;
+
+          if (
+            data &&
+            !["pending", "approved", "needs_changes"].includes(
+              data.status
+            )
+          ) {
+            throw new Error("Unknown certificate status");
+          }
+
+          setCertificate(data as Certificate | null);
+          setProfileLoaded(true);
+
+          if (data?.status === "approved") {
+            setWarningVisible(false);
+          }
+        } catch {
+          if (!active) return;
+
           setMessage(
-            "Din volontärprofil saknas. Gå tillbaka och spara dina uppgifter på Om dig."
+            "Kunde inte hämta din certifiering. Kontrollera anslutningen och försök igen."
           );
-          return;
+        } finally {
+          if (active) setIsLoading(false);
         }
+      };
 
-        setStatus({
-          // BankID-steget är simulerat i prototypen.
-          identityVerified: true,
-          trainingCompleted:
-            data.training_demo_completed ||
-            data.training_status === "completed",
-        });
-      } catch {
-        if (!isMounted) return;
+      void loadCertification();
 
-        setMessage(
-          "Kunde inte hämta din certifiering. Kontrollera anslutningen och försök igen."
-        );
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    void loadCertification();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [loadAttempt]);
+      return () => {
+        active = false;
+      };
+    }, [loadAttempt])
+  );
 
   const handleLogout = async () => {
     if (logoutLock.current) return;
@@ -112,119 +150,146 @@ export default function HelperCertificationScreen() {
     }
   };
 
-  const isCertified =
-    status !== null &&
-    status.identityVerified &&
-    status.trainingCompleted;
+  const handleHome = () => {
+    if (
+      isLoading ||
+      isLoggingOut ||
+      !profileLoaded ||
+      message !== ""
+    ) {
+      return;
+    }
+
+    if (!isApproved) {
+      setWarningVisible(true);
+      return;
+    }
+
+    // Navigation läggs till när hemskärmen har skapats.
+  };
+
+  const openTraining = () => {
+    setWarningVisible(false);
+    router.push("/helper-training");
+  };
+
+  const refreshStatus = () => {
+    setLoadAttempt((current) => current + 1);
+  };
+
+  const trainingDescription = isApproved
+    ? "Intyget är godkänt"
+    : isPending
+      ? "Inväntar granskning"
+      : needsChanges
+        ? "Komplettering behövs"
+        : "Intyg saknas";
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          isCompact && styles.contentCompact,
+        ]}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
-        <View style={styles.heading}>
-          <View style={styles.iconCircle}>
-            {isLoading ? (
-              <ActivityIndicator
-                size="large"
-                color={colors.primary}
-              />
-            ) : (
-              <Award
-                size={72}
-                color={colors.primary}
-                strokeWidth={1.6}
-              />
+        <View style={styles.main}>
+          <View style={styles.heading}>
+            <View
+              style={[
+                styles.iconCircle,
+                isCompact && styles.iconCircleCompact,
+              ]}
+            >
+              {isLoading ? (
+                <ActivityIndicator
+                  size="large"
+                  color={colors.primary}
+                />
+              ) : (
+                <Award
+                  size={isCompact ? 48 : 58}
+                  color={colors.primary}
+                  strokeWidth={1.6}
+                />
+              )}
+            </View>
+
+            <Text
+              style={[
+                styles.title,
+                isCompact && styles.titleCompact,
+              ]}
+            >
+              {isLoading
+                ? "Hämtar din certifiering"
+                : isApproved
+                  ? "Du är nu certifierad volontär"
+                  : "Din certifiering"}
+            </Text>
+
+            {!isLoading && profileLoaded && (
+              <Text style={styles.description}>
+                Tack för att du vill finnas där för andra.
+              </Text>
             )}
           </View>
 
-          <Text style={styles.title}>
-            {isLoading
-              ? "Hämtar din certifiering"
-              : isCertified
-                ? "Du är nu certifierad volontär"
-                : "Din certifiering"}
-          </Text>
-
-          {status && (
-            <Text style={styles.description}>
-              {isCertified
-                ? "Du har uppfyllt kraven för att bli volontär."
-                : "Verifiera din identitet och genomför utbildningen för att bli volontär."}
-            </Text>
-          )}
-        </View>
-
-        {!isLoading && status && (
-          <View style={styles.certificate}>
-            <Text style={styles.brand}>AppNamn</Text>
-
-            <Text style={styles.certificateTitle}>
-              Certifierad volontär
-            </Text>
-
-            <View style={styles.requirements}>
+          {!isLoading && profileLoaded && (
+            <View style={styles.statusCard}>
               <Requirement
                 title="Identitet"
-                description={
-                  status.identityVerified
-                    ? "Verifierad med BankID"
-                    : "Inte verifierad"
-                }
-                completed={status.identityVerified}
+                description="Verifierad i prototypen"
+                completed
               />
 
               <View style={styles.divider} />
 
               <Requirement
-                title="Utbildning"
-                description={
-                  status.trainingCompleted
-                    ? "Genomförd"
-                    : "Inte genomförd"
-                }
-                completed={status.trainingCompleted}
+                title="Utbildningsintyg"
+                description={trainingDescription}
+                completed={isApproved}
               />
             </View>
+          )}
 
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>
-                {isCertified ? "Godkänd" : "Inte klar"}
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {message !== "" && (
-          <Text
-            style={styles.message}
-            accessibilityLiveRegion="polite"
-          >
-            {message}
-          </Text>
-        )}
+          {message !== "" && (
+            <Text
+              style={styles.message}
+              accessibilityLiveRegion="polite"
+            >
+              {message}
+            </Text>
+          )}
+        </View>
       </ScrollView>
 
       <View style={styles.bottom}>
         {message !== "" ? (
           <PrimaryButton
             title="Försök igen"
-            disabled={isLoggingOut}
-            onPress={() => setLoadAttempt((current) => current + 1)}
+            disabled={isLoggingOut || isLoading}
+            onPress={refreshStatus}
           />
         ) : (
           <PrimaryButton
-            title="Till hemskärmen"
-            disabled
-            onPress={() => {}}
+            title={isLoading ? "Hämtar..." : "Till hemskärmen"}
+            disabled={
+              isLoading ||
+              isLoggingOut ||
+              !profileLoaded ||
+              isApproved
+            }
+            onPress={handleHome}
           />
         )}
 
         {logoutMessage !== "" && (
           <Text
-            style={styles.logoutMessage}
+            style={styles.message}
             accessibilityLiveRegion="polite"
           >
             {logoutMessage}
@@ -233,7 +298,6 @@ export default function HelperCertificationScreen() {
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Logga ut"
           accessibilityState={{
             disabled: isLoggingOut,
             busy: isLoggingOut,
@@ -241,7 +305,7 @@ export default function HelperCertificationScreen() {
           disabled={isLoggingOut}
           onPress={() => void handleLogout()}
           style={({ pressed }) => [
-            styles.logoutButton,
+            styles.textButton,
             pressed && styles.pressed,
             isLoggingOut && styles.disabled,
           ]}
@@ -253,11 +317,140 @@ export default function HelperCertificationScreen() {
             />
           )}
 
-          <Text style={styles.logoutText}>
+          <Text style={styles.textButtonText}>
             {isLoggingOut ? "Loggar ut..." : "Logga ut"}
           </Text>
         </Pressable>
       </View>
+
+      <Modal
+        visible={warningVisible}
+        animationType="slide"
+        onRequestClose={() => setWarningVisible(false)}
+      >
+        <SafeAreaView style={styles.container}>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.warningContent}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+          >
+            <View style={styles.warningMain}>
+              <View style={styles.eyebrow}>
+                <Users
+                  size={20}
+                  color={colors.primary}
+                  strokeWidth={1.8}
+                />
+
+                <Text style={styles.eyebrowText}>
+                  Nära dig
+                </Text>
+              </View>
+
+              <Text
+                style={[
+                  styles.warningTitle,
+                  isCompact && styles.warningTitleCompact,
+                ]}
+                accessibilityRole="header"
+              >
+                Din hjälp behövs i närområdet
+              </Text>
+
+              <View style={styles.accentLine} />
+
+              <View style={styles.notice}>
+                <View style={styles.noticeHeading}>
+                  {isPending ? (
+                    <Clock
+                      size={21}
+                      color={colors.primary}
+                      strokeWidth={1.8}
+                    />
+                  ) : (
+                    <FileText
+                      size={21}
+                      color={colors.primary}
+                      strokeWidth={1.8}
+                    />
+                  )}
+
+                  <Text style={styles.noticeTitle}>
+                    {isPending
+                      ? "Ditt intyg granskas"
+                      : needsChanges
+                        ? "Komplettera ditt intyg"
+                        : "Ett steg återstår"}
+                  </Text>
+                </View>
+
+                <Text style={styles.noticeText}>
+                  {isPending
+                    ? "Du kan börja hjälpa när intyget har godkänts. Granskningen tar normalt upp till en vecka."
+                    : needsChanges
+                      ? "Se vad du behöver komplettera innan ditt intyg kan godkännas."
+                      : "Ett godkänt utbildningsintyg krävs för att börja hjälpa. Gå utbildningen eller ladda upp ett intyg du redan har."}
+                </Text>
+
+                {needsChanges && certificate?.review_note && (
+                  <View style={styles.reviewNote}>
+                    <Text style={styles.reviewLabel}>
+                      Från granskningen
+                    </Text>
+
+                    <Text style={styles.reviewText}>
+                      {certificate.review_note}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              {message !== "" && (
+                <Text
+                  style={styles.message}
+                  accessibilityLiveRegion="polite"
+                >
+                  {message}
+                </Text>
+              )}
+            </View>
+          </ScrollView>
+
+          <View style={styles.bottom}>
+            <PrimaryButton
+              title={
+                isLoading
+                  ? "Hämtar..."
+                  : isPending
+                    ? "Uppdatera status"
+                    : needsChanges
+                      ? "Visa mitt intyg"
+                      : "Ladda upp intyg"
+              }
+              disabled={isLoading}
+              onPress={
+                isPending || message !== ""
+                  ? refreshStatus
+                  : openTraining
+              }
+            />
+
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setWarningVisible(false)}
+              style={({ pressed }) => [
+                styles.textButton,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={styles.textButtonText}>
+                Tillbaka till certifieringen
+              </Text>
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -285,7 +478,7 @@ function Requirement({
           <Check
             size={17}
             color={colors.primary}
-            strokeWidth={3}
+            strokeWidth={2.8}
           />
         )}
       </View>
@@ -314,9 +507,18 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 28,
-    paddingTop: 32,
-    paddingBottom: 28,
+    paddingVertical: 24,
+  },
+
+  contentCompact: {
+    paddingVertical: 12,
+  },
+
+  main: {
+    width: "100%",
+    maxWidth: 380,
   },
 
   heading: {
@@ -324,58 +526,53 @@ const styles = StyleSheet.create({
   },
 
   iconCircle: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: 112,
+    height: 112,
+    borderRadius: 56,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#DCEAF3",
-    marginBottom: 26,
+    marginBottom: 22,
+  },
+
+  iconCircleCompact: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    marginBottom: 16,
   },
 
   title: {
     maxWidth: 320,
     textAlign: "center",
-    fontSize: 31,
-    lineHeight: 39,
+    fontSize: 29,
+    lineHeight: 36,
     fontWeight: "700",
     color: colors.text,
   },
 
+  titleCompact: {
+    fontSize: 26,
+    lineHeight: 33,
+  },
+
   description: {
-    maxWidth: 310,
-    marginTop: 12,
+    maxWidth: 290,
+    marginTop: 10,
     textAlign: "center",
-    fontSize: 16,
-    lineHeight: 23,
+    fontSize: 15,
+    lineHeight: 22,
     color: colors.textSecondary,
   },
 
-  certificate: {
-    marginTop: 30,
-    padding: 22,
+  statusCard: {
+    marginTop: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-  },
-
-  brand: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: colors.primary,
-  },
-
-  certificateTitle: {
-    marginTop: 6,
-    fontSize: 21,
-    lineHeight: 28,
-    fontWeight: "700",
-    color: colors.text,
-  },
-
-  requirements: {
-    marginTop: 22,
   },
 
   requirementRow: {
@@ -404,41 +601,124 @@ const styles = StyleSheet.create({
   },
 
   requirementTitle: {
-    fontSize: 16,
+    fontSize: 15,
+    lineHeight: 21,
     fontWeight: "600",
     color: colors.text,
   },
 
   requirementDescription: {
-    marginTop: 3,
-    fontSize: 14,
-    lineHeight: 20,
+    marginTop: 2,
+    fontSize: 13,
+    lineHeight: 19,
     color: colors.textSecondary,
   },
 
   divider: {
     height: 1,
-    marginVertical: 16,
+    marginVertical: 14,
     backgroundColor: colors.border,
   },
 
-  statusBadge: {
-    alignSelf: "flex-start",
-    marginTop: 22,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    backgroundColor: "#DCEAF3",
+  warningContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 28,
+    paddingVertical: 32,
   },
 
-  statusText: {
+  warningMain: {
+    width: "100%",
+    maxWidth: 380,
+  },
+
+  eyebrow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 20,
+  },
+
+  eyebrowText: {
     fontSize: 14,
-    fontWeight: "700",
+    lineHeight: 20,
+    fontWeight: "600",
     color: colors.primary,
   },
 
+  warningTitle: {
+    fontSize: 38,
+    lineHeight: 46,
+    fontWeight: "700",
+    letterSpacing: -0.8,
+    color: colors.text,
+  },
+
+  warningTitleCompact: {
+    fontSize: 32,
+    lineHeight: 40,
+  },
+
+  accentLine: {
+    width: 48,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.primary,
+    marginTop: 24,
+    marginBottom: 28,
+  },
+
+  notice: {
+    padding: 20,
+    borderRadius: 18,
+    backgroundColor: colors.surface,
+  },
+
+  noticeHeading: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  noticeTitle: {
+    flex: 1,
+    fontSize: 16,
+    lineHeight: 23,
+    fontWeight: "600",
+    color: colors.text,
+  },
+
+  noticeText: {
+    marginTop: 10,
+    fontSize: 15,
+    lineHeight: 24,
+    color: colors.textSecondary,
+  },
+
+  reviewNote: {
+    marginTop: 16,
+    paddingTop: 14,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+
+  reviewLabel: {
+    fontSize: 12,
+    lineHeight: 18,
+    fontWeight: "600",
+    color: colors.textSecondary,
+  },
+
+  reviewText: {
+    marginTop: 5,
+    fontSize: 14,
+    lineHeight: 22,
+    color: colors.text,
+  },
+
   message: {
-    marginTop: 20,
+    marginTop: 16,
     textAlign: "center",
     fontSize: 14,
     lineHeight: 21,
@@ -447,31 +727,25 @@ const styles = StyleSheet.create({
 
   bottom: {
     paddingHorizontal: 28,
-    paddingTop: 12,
-    paddingBottom: 12,
+    paddingTop: 10,
+    paddingBottom: 8,
+    backgroundColor: colors.background,
   },
 
-  logoutButton: {
+  textButton: {
     minHeight: 48,
-    paddingVertical: 14,
+    paddingVertical: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
   },
 
-  logoutText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: colors.primary,
-  },
-
-  logoutMessage: {
-    marginTop: 12,
+  textButtonText: {
     textAlign: "center",
     fontSize: 14,
-    lineHeight: 20,
-    color: colors.error,
+    fontWeight: "600",
+    color: colors.primary,
   },
 
   pressed: {

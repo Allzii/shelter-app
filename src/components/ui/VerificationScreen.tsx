@@ -1,7 +1,8 @@
-import { Check, ShieldCheck } from "lucide-react-native";
+import { Check, Info, ShieldCheck, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -19,8 +20,8 @@ type VerificationState = "idle" | "verifying" | "verified";
 type VerificationScreenProps = {
   step?: string;
   title: string;
-  description: string;
-  verificationDescription: string;
+  description?: string;
+  verificationDescription?: string;
   verifiedTitle?: string;
   onContinue: () => void;
   onManualVerification?: () => void;
@@ -36,6 +37,7 @@ export default function VerificationScreen({
   onManualVerification,
 }: VerificationScreenProps) {
   const [state, setState] = useState<VerificationState>("idle");
+  const [privacyVisible, setPrivacyVisible] = useState(false);
 
   const verificationTimer =
     useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -72,6 +74,12 @@ export default function VerificationScreen({
   const isVerifying = state === "verifying";
   const isVerified = state === "verified";
 
+  const currentVerificationDescription = isVerified
+    ? "Du kan nu fortsätta registreringen."
+    : isVerifying
+      ? "Identifieringen pågår..."
+      : verificationDescription;
+
   return (
     <SafeAreaView style={styles.container}>
       <ScreenHeader step={step} />
@@ -83,7 +91,10 @@ export default function VerificationScreen({
       >
         <View>
           <Text style={styles.title}>{title}</Text>
-          <Text style={styles.description}>{description}</Text>
+
+          {!!description && (
+            <Text style={styles.description}>{description}</Text>
+          )}
         </View>
 
         <View
@@ -119,17 +130,43 @@ export default function VerificationScreen({
                 : "Identifiera dig med BankID"}
           </Text>
 
-          <Text style={styles.verificationDescription}>
-            {isVerified
-              ? "Du kan nu fortsätta registreringen."
-              : isVerifying
-                ? "Identifieringen pågår..."
-                : verificationDescription}
-          </Text>
+          {!!currentVerificationDescription && (
+            <Text style={styles.verificationDescription}>
+              {currentVerificationDescription}
+            </Text>
+          )}
         </View>
       </ScrollView>
 
       <View style={styles.bottom}>
+        <View style={styles.privacyCard}>
+          <Info
+            size={18}
+            color={colors.primary}
+            style={styles.infoIcon}
+          />
+
+          <View style={styles.privacyContent}>
+            <Text style={styles.privacyText}>
+              Vi behöver dina personuppgifter för att kunna verifiera din identitet och skapa din profil.
+            </Text>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Så behandlar vi dina personuppgifter"
+              onPress={() => setPrivacyVisible(true)}
+              style={({ pressed }) => [
+                styles.privacyLinkButton,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={styles.privacyLink}>
+                Så behandlar vi dina personuppgifter
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+
         {isVerified ? (
           <PrimaryButton
             title="Fortsätt"
@@ -181,6 +218,68 @@ export default function VerificationScreen({
           </Pressable>
         )}
       </View>
+
+      <Modal
+        visible={privacyVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPrivacyVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View
+            style={styles.modalCard}
+            accessibilityViewIsModal
+          >
+            <View style={styles.modalHeader}>
+              <Text
+                style={styles.modalTitle}
+                accessibilityRole="header"
+              >
+                Dina personuppgifter
+              </Text>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Stäng informationen"
+                onPress={() => setPrivacyVisible(false)}
+                style={styles.closeButton}
+              >
+                <X size={23} color={colors.text} />
+              </Pressable>
+            </View>
+
+            <ScrollView
+              style={styles.modalScroll}
+              contentContainerStyle={styles.modalContent}
+              showsVerticalScrollIndicator={false}
+            >
+              <Text style={styles.sectionTitle}>
+                Varför vi behöver uppgifterna
+              </Text>
+
+              <Text style={styles.modalText}>
+                Uppgifterna du lämnar vid registreringen används
+                för att skapa din profil och samordna hjälp.
+                Identifieringen är till för att bekräfta din identitet.
+              </Text>
+
+              <Text style={styles.sectionTitle}>
+                Uppgifter i din profil
+              </Text>
+
+              <Text style={styles.modalText}>
+                Registreringen omfattar namn, kontaktuppgifter
+                och adress.
+              </Text>
+            </ScrollView>
+
+            <PrimaryButton
+              title="Stäng"
+              onPress={() => setPrivacyVisible(false)}
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -199,7 +298,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 28,
     paddingTop: 32,
-    paddingBottom: 28,
+    paddingBottom: 16,
   },
 
   title: {
@@ -221,8 +320,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 44,
-    paddingBottom: 44,
+    paddingTop: 28,
+    paddingBottom: 28,
   },
 
   iconCircle: {
@@ -259,8 +358,46 @@ const styles = StyleSheet.create({
 
   bottom: {
     paddingHorizontal: 28,
-    paddingTop: 12,
+    paddingTop: 8,
     paddingBottom: 12,
+  },
+
+  privacyCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 16,
+    borderRadius: 14,
+    backgroundColor: "#F7FAFC",
+  },
+
+  infoIcon: {
+    marginTop: 2,
+  },
+
+  privacyContent: {
+    flex: 1,
+  },
+
+  privacyText: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: colors.textSecondary,
+  },
+
+  privacyLinkButton: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingTop: 4,
+  },
+
+  privacyLink: {
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: "600",
+    color: colors.primary,
   },
 
   verifyButton: {
@@ -297,6 +434,69 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: colors.primary,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(15, 30, 45, 0.4)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 48,
+  },
+
+  modalCard: {
+    width: "100%",
+    maxWidth: 440,
+    maxHeight: "100%",
+    padding: 22,
+    borderRadius: 22,
+    backgroundColor: colors.surface,
+  },
+
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+
+  modalTitle: {
+    flex: 1,
+    fontSize: 22,
+    lineHeight: 29,
+    fontWeight: "700",
+    color: colors.text,
+  },
+
+  closeButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  modalScroll: {
+    flexShrink: 1,
+  },
+
+  modalContent: {
+    paddingBottom: 24,
+  },
+
+  sectionTitle: {
+    marginTop: 14,
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: "700",
+    color: colors.text,
+  },
+
+  modalText: {
+    marginTop: 6,
+    fontSize: 14,
+    lineHeight: 22,
+    color: colors.textSecondary,
   },
 
   pressed: {

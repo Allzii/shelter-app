@@ -1,10 +1,15 @@
 import * as Location from "expo-location";
 import * as Notifications from "expo-notifications";
-import { Bell, Check, MapPin, type LucideIcon } from "lucide-react-native";
+import {
+  Bell,
+  Check,
+  Info,
+  MapPin,
+  type LucideIcon,
+} from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   AppState,
   Linking,
   Platform,
@@ -21,15 +26,17 @@ import ScreenHeader from "@/components/ui/ScreenHeader";
 import { colors } from "@/constants/colors";
 
 type PermissionState =
+  | "checking"
   | "idle"
   | "requesting"
   | "granted"
   | "denied"
-  | "error";
+  | "blocked"
+  | "error"
+  | "unavailable";
 
 type PermissionsScreenProps = {
   step: string;
-  description: string;
   locationDescription: string;
   notificationDescription: string;
   buttonTitle: string;
@@ -47,9 +54,20 @@ function notificationsAllowed(
   );
 }
 
+function permissionState(
+  granted: boolean,
+  status: string,
+  canAskAgain: boolean
+): PermissionState {
+  if (granted) return "granted";
+  if (!canAskAgain) return "blocked";
+  if (status === "denied") return "denied";
+
+  return "idle";
+}
+
 export default function PermissionsScreen({
   step,
-  description,
   locationDescription,
   notificationDescription,
   buttonTitle,
@@ -57,18 +75,30 @@ export default function PermissionsScreen({
   showLocation = true,
 }: PermissionsScreenProps) {
   const [locationState, setLocationState] =
-    useState<PermissionState>("idle");
+    useState<PermissionState>("checking");
+
   const [notificationState, setNotificationState] =
-    useState<PermissionState>("idle");
+    useState<PermissionState>("checking");
+
+  const [message, setMessage] = useState("");
 
   const requestingLocation = useRef(false);
   const requestingNotifications = useRef(false);
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    mounted.current = true;
+
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
     let latestCheck = 0;
 
-    const loadCurrentPermissions = async () => {
+    const loadPermissions = async () => {
       const check = ++latestCheck;
 
       const [locationResult, notificationResult] =
@@ -76,7 +106,9 @@ export default function PermissionsScreen({
           showLocation
             ? Location.getForegroundPermissionsAsync()
             : Promise.resolve(null),
-          Notifications.getPermissionsAsync(),
+          Platform.OS === "web"
+            ? Promise.resolve(null)
+            : Notifications.getPermissionsAsync(),
         ]);
 
       if (!active || check !== latestCheck) return;
@@ -89,11 +121,11 @@ export default function PermissionsScreen({
           const permission = locationResult.value;
 
           setLocationState(
-            permission.granted
-              ? "granted"
-              : permission.status === "denied"
-                ? "denied"
-                : "idle"
+            permissionState(
+              permission.granted,
+              permission.status,
+              permission.canAskAgain
+            )
           );
         } else {
           setLocationState("error");
@@ -101,15 +133,20 @@ export default function PermissionsScreen({
       }
 
       if (!requestingNotifications.current) {
-        if (notificationResult.status === "fulfilled") {
+        if (Platform.OS === "web") {
+          setNotificationState("unavailable");
+        } else if (
+          notificationResult.status === "fulfilled" &&
+          notificationResult.value
+        ) {
           const permission = notificationResult.value;
 
           setNotificationState(
-            notificationsAllowed(permission)
-              ? "granted"
-              : permission.status === "denied"
-                ? "denied"
-                : "idle"
+            permissionState(
+              notificationsAllowed(permission),
+              permission.status,
+              permission.canAskAgain
+            )
           );
         } else {
           setNotificationState("error");
@@ -117,11 +154,11 @@ export default function PermissionsScreen({
       }
     };
 
-    void loadCurrentPermissions();
+    void loadPermissions();
 
     const subscription = AppState.addEventListener("change", (state) => {
       if (state === "active") {
-        void loadCurrentPermissions();
+        void loadPermissions();
       }
     });
 
@@ -131,40 +168,85 @@ export default function PermissionsScreen({
     };
   }, [showLocation]);
 
+  const openSettings = async () => {
+    setMessage("");
+
+    if (Platform.OS === "web") {
+      setMessage(
+        "Ändra platsbehörigheten i webbläsarens inställningar för den här webbplatsen och ladda sedan om sidan."
+      );
+      return;
+    }
+
+    try {
+      await Linking.openSettings();
+    } catch {
+      if (!mounted.current) return;
+
+      setMessage(
+        "Kunde inte öppna inställningarna. Öppna telefonens inställningar och välj appen."
+      );
+    }
+  };
+
   const requestLocation = async () => {
-    if (!showLocation || requestingLocation.current) return;
+    if (
+      !showLocation ||
+      requestingLocation.current ||
+      requestingNotifications.current
+    ) {
+      return;
+    }
+
+    if (locationState === "blocked") {
+      await openSettings();
+      return;
+    }
 
     requestingLocation.current = true;
     setLocationState("requesting");
+    setMessage("");
 
     try {
       const permission =
         await Location.requestForegroundPermissionsAsync();
 
-      if (!permission.granted) {
-        setLocationState("denied");
-        showPermissionDenied("position", permission.canAskAgain);
-        return;
-      }
+      if (!mounted.current) return;
 
-      setLocationState("granted");
-    } catch {
-      setLocationState("error");
-
-      Alert.alert(
-        "Kunde inte kontrollera platsbehörigheten",
-        "Försök igen eller kontrollera telefonens inställningar."
+      setLocationState(
+        permissionState(
+          permission.granted,
+          permission.status,
+          permission.canAskAgain
+        )
       );
+    } catch {
+      if (!mounted.current) return;
+
+      setLocationState("error");
     } finally {
       requestingLocation.current = false;
     }
   };
 
   const requestNotifications = async () => {
-    if (requestingNotifications.current) return;
+    if (
+      requestingNotifications.current ||
+      requestingLocation.current
+    ) {
+      return;
+    }
+
+    if (Platform.OS === "web") return;
+
+    if (notificationState === "blocked") {
+      await openSettings();
+      return;
+    }
 
     requestingNotifications.current = true;
     setNotificationState("requesting");
+    setMessage("");
 
     try {
       if (Platform.OS === "android") {
@@ -177,32 +259,35 @@ export default function PermissionsScreen({
 
       const permission = await Notifications.requestPermissionsAsync();
 
-      if (!notificationsAllowed(permission)) {
-        setNotificationState("denied");
-        showPermissionDenied("notiser", permission.canAskAgain);
-        return;
-      }
+      if (!mounted.current) return;
 
-      setNotificationState("granted");
-    } catch {
-      setNotificationState("error");
-
-      Alert.alert(
-        "Kunde inte kontrollera notisbehörigheten",
-        "Försök igen eller kontrollera telefonens inställningar."
+      setNotificationState(
+        permissionState(
+          notificationsAllowed(permission),
+          permission.status,
+          permission.canAskAgain
+        )
       );
+    } catch {
+      if (!mounted.current) return;
+
+      setNotificationState("error");
     } finally {
       requestingNotifications.current = false;
     }
   };
 
-  // Återaktivera valideringen efter testning:
-  // const isComplete =
-  //   (!showLocation || locationState === "granted") &&
-  //   notificationState === "granted";
+  const isRequesting =
+    locationState === "requesting" ||
+    notificationState === "requesting";
 
   const handleContinue = () => {
-    // if (!isComplete) return;
+    if (
+      requestingLocation.current ||
+      requestingNotifications.current
+    ) {
+      return;
+    }
 
     onContinue();
   };
@@ -216,50 +301,60 @@ export default function PermissionsScreen({
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>
-          {showLocation ? "Notiser och position" : "Notiser"}
-        </Text>
+        <Text style={styles.title}>Håll dig uppdaterad</Text>
 
-        <Text style={styles.description}>{description}</Text>
+        <View style={styles.cards}>
+          <PermissionCard
+            icon={Bell}
+            title="Notiser"
+            description={notificationDescription}
+            state={notificationState}
+            allowLabel="Tillåt notiser"
+            disabled={isRequesting}
+            onPress={() => void requestNotifications()}
+          />
 
-        <View style={styles.settings}>
           {showLocation && (
-            <PermissionRow
+            <PermissionCard
               icon={MapPin}
-              title="Position"
-              description={getPermissionDescription(
-                locationState,
-                "Platsbehörighet",
-                locationDescription
-              )}
+              title="Din position"
+              description={locationDescription}
               state={locationState}
+              allowLabel="Tillåt platsåtkomst"
+              disabled={isRequesting}
               onPress={() => void requestLocation()}
             />
           )}
-
-          <PermissionRow
-            icon={Bell}
-            title="Notiser"
-            description={getPermissionDescription(
-              notificationState,
-              "Notiser",
-              notificationDescription
-            )}
-            state={notificationState}
-            onPress={() => void requestNotifications()}
-            isLast
-          />
         </View>
 
-        <Text style={styles.infoText}>
-          Du kan ändra behörigheterna senare i telefonens inställningar.
-        </Text>
+        <View style={styles.infoRow}>
+          <Info
+            size={17}
+            color={colors.textSecondary}
+            style={styles.infoIcon}
+          />
+
+          <Text style={styles.infoText}>
+            {Platform.OS === "web"
+              ? "Platsåtkomst hanteras i webbläsaren. Notiser ställer du in i appen på telefonen."
+              : "Du kan ändra behörigheterna senare i telefonens inställningar."}
+          </Text>
+        </View>
+
+        {message !== "" && (
+          <Text
+            style={styles.message}
+            accessibilityLiveRegion="polite"
+          >
+            {message}
+          </Text>
+        )}
       </ScrollView>
 
       <View style={styles.bottom}>
         <PrimaryButton
           title={buttonTitle}
-          // disabled={!isComplete}
+          disabled={isRequesting}
           onPress={handleContinue}
         />
       </View>
@@ -267,133 +362,128 @@ export default function PermissionsScreen({
   );
 }
 
-function showPermissionDenied(
-  permissionName: string,
-  canAskAgain: boolean
-) {
-  if (canAskAgain) {
-    Alert.alert(
-      "Behörighet behövs",
-      `Tillåt ${permissionName} för att använda den här funktionen.`
-    );
-    return;
-  }
-
-  Alert.alert(
-    "Öppna Inställningar",
-    `Tillåt ${permissionName} för appen i telefonens inställningar.`,
-    [
-      { text: "Avbryt", style: "cancel" },
-      {
-        text: "Öppna Inställningar",
-        onPress: () => {
-          void Linking.openSettings().catch(() => {
-            Alert.alert(
-              "Kunde inte öppna Inställningar",
-              "Öppna telefonens inställningar och välj appen."
-            );
-          });
-        },
-      },
-    ]
-  );
-}
-
-function getPermissionDescription(
-  state: PermissionState,
-  name: "Platsbehörighet" | "Notiser",
-  idleDescription: string
-) {
-  switch (state) {
-    case "requesting":
-      return "Kontrollerar behörighet...";
-    case "denied":
-      return name === "Notiser"
-        ? "Notiser är inte tillåtna"
-        : "Platsbehörighet är inte tillåten";
-    case "granted":
-      return name === "Notiser"
-        ? "Notiser är tillåtna"
-        : "Platsbehörighet är tillåten";
-    case "error":
-      return "Kunde inte kontrollera behörigheten";
-    default:
-      return idleDescription;
-  }
-}
-
-type PermissionRowProps = {
+type PermissionCardProps = {
   icon: LucideIcon;
   title: string;
   description: string;
   state: PermissionState;
+  allowLabel: string;
+  disabled: boolean;
   onPress: () => void;
-  isLast?: boolean;
 };
 
-function PermissionRow({
+function PermissionCard({
   icon: Icon,
   title,
   description,
   state,
+  allowLabel,
+  disabled,
   onPress,
-  isLast = false,
-}: PermissionRowProps) {
+}: PermissionCardProps) {
   const isGranted = state === "granted";
-  const isRequesting = state === "requesting";
-  const needsRetry = state === "denied" || state === "error";
-  const isDisabled = isGranted || isRequesting;
+  const isBusy = state === "checking" || state === "requesting";
+  const isUnavailable = state === "unavailable";
 
-  const buttonLabel = isGranted
-    ? `${title}: behörighet tillåten`
-    : isRequesting
-      ? `Kontrollerar behörighet för ${title.toLowerCase()}`
-      : needsRetry
-        ? `Försök igen med ${title.toLowerCase()}`
-        : `Tillåt ${title.toLowerCase()}`;
+  const buttonLabel =
+    state === "blocked"
+      ? Platform.OS === "web"
+        ? "Ändra i webbläsaren"
+        : "Öppna inställningar"
+      : state === "denied" || state === "error"
+        ? "Försök igen"
+        : allowLabel;
+
+  const statusMessage =
+    state === "blocked"
+      ? Platform.OS === "web"
+        ? "Behörigheten behöver ändras i webbläsarens inställningar."
+        : "Behörigheten behöver ändras i telefonens inställningar."
+      : state === "denied"
+        ? "Inte tillåtet ännu. Du kan försöka igen."
+        : state === "error"
+          ? "Kunde inte kontrollera behörigheten. Försök igen."
+          : "";
 
   return (
-    <View style={[styles.settingRow, isLast && styles.lastSettingRow]}>
-      <View style={styles.settingIcon}>
-        <Icon size={22} color={colors.primary} />
+    <View style={[styles.card, isGranted && styles.cardGranted]}>
+      <View style={styles.cardHeader}>
+        <View
+          style={[
+            styles.cardIcon,
+            isGranted && styles.cardIconGranted,
+          ]}
+        >
+          <Icon
+            size={23}
+            color={isGranted ? colors.success : colors.primary}
+            strokeWidth={1.8}
+          />
+        </View>
+
+        <Text style={styles.cardTitle}>{title}</Text>
       </View>
 
-      <View style={styles.settingText}>
-        <Text style={styles.settingTitle}>{title}</Text>
-        <Text style={styles.settingDescription}>{description}</Text>
-      </View>
+      <Text style={styles.cardDescription}>{description}</Text>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={buttonLabel}
-        accessibilityState={{
-          disabled: isDisabled,
-          busy: isRequesting,
-        }}
-        disabled={isDisabled}
-        onPress={onPress}
-        style={({ pressed }) => [
-          styles.permissionButton,
-          isGranted && styles.permissionButtonGranted,
-          needsRetry && styles.permissionButtonDenied,
-          pressed && styles.pressed,
-        ]}
-      >
-        {isRequesting ? (
-          <ActivityIndicator size="small" color={colors.primary} />
-        ) : isGranted ? (
-          <Check size={18} color={colors.success} strokeWidth={3} />
-        ) : (
-          <Text
-            style={[
-              styles.permissionButtonText,
-              needsRetry && styles.permissionButtonRetryText,
-            ]}
-          >
-            {needsRetry ? "Försök igen" : "Tillåt"}
+      <View accessibilityLiveRegion="polite">
+        {isGranted ? (
+          <View style={styles.grantedRow}>
+            <Check
+              size={19}
+              color={colors.success}
+              strokeWidth={2.5}
+            />
+
+            <Text style={styles.grantedText}>Tillåtet</Text>
+          </View>
+        ) : isUnavailable ? (
+          <Text style={styles.unavailableText}>
+            Aktiveras i appen på telefonen
           </Text>
+        ) : (
+          <>
+            {statusMessage !== "" && (
+              <Text style={styles.statusMessage}>
+                {statusMessage}
+              </Text>
+            )}
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${title}: ${
+                isBusy ? "Kontrollerar behörighet" : buttonLabel
+              }`}
+              accessibilityState={{
+                disabled: disabled || isBusy,
+                busy: isBusy,
+              }}
+              disabled={disabled || isBusy}
+              onPress={onPress}
+              style={({ pressed }) => [
+                styles.permissionButton,
+                pressed && styles.pressed,
+                (disabled || isBusy) && styles.disabled,
+              ]}
+            >
+              {isBusy && (
+                <ActivityIndicator
+                  size="small"
+                  color={colors.primary}
+                />
+              )}
+
+              <Text style={styles.permissionButtonText}>
+                {state === "checking"
+                  ? "Kontrollerar..."
+                  : state === "requesting"
+                    ? "Väntar på ditt svar..."
+                    : buttonLabel}
+              </Text>
+            </Pressable>
+          </>
         )}
-      </Pressable>
+      </View>
     </View>
   );
 }
@@ -403,106 +493,170 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+
   scrollView: {
     flex: 1,
   },
+
   content: {
-    paddingHorizontal: 28,
-    paddingTop: 32,
-    paddingBottom: 25,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 20,
   },
+
   title: {
-    maxWidth: 320,
-    fontSize: 31,
-    lineHeight: 39,
+    fontSize: 29,
+    lineHeight: 37,
     fontWeight: "700",
     color: colors.text,
   },
+
   description: {
     marginTop: 9,
-    fontSize: 16,
+    fontSize: 15,
     lineHeight: 23,
     color: colors.textSecondary,
   },
-  settings: {
-    marginTop: 30,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: colors.border,
+
+  cards: {
+    marginTop: 24,
+    gap: 16,
   },
-  settingRow: {
-    minHeight: 94,
-    paddingVertical: 14,
+
+  card: {
+    padding: 20,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+
+  cardGranted: {
+    borderColor: "#BDDBCD",
+  },
+
+  cardHeader: {
     flexDirection: "row",
     alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    gap: 12,
   },
-  lastSettingRow: {
-    borderBottomWidth: 0,
-  },
-  settingIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+
+  cardIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.surface,
-    marginRight: 12,
+    backgroundColor: "#E6EFF6",
   },
-  settingText: {
+
+  cardIconGranted: {
+    backgroundColor: colors.successBackground,
+  },
+
+  cardTitle: {
     flex: 1,
-    paddingRight: 10,
-  },
-  settingTitle: {
-    fontSize: 16,
+    fontSize: 19,
+    lineHeight: 25,
     fontWeight: "700",
     color: colors.text,
   },
-  settingDescription: {
-    marginTop: 3,
-    fontSize: 12,
-    lineHeight: 17,
+
+  cardDescription: {
+    marginTop: 12,
+    fontSize: 14,
+    lineHeight: 21,
     color: colors.textSecondary,
   },
+
   permissionButton: {
-    minWidth: 62,
-    minHeight: 44,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
+    minHeight: 46,
+    marginTop: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: "#E6EFF6",
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#DCEAF1",
+    gap: 9,
   },
-  permissionButtonGranted: {
-    minWidth: 44,
-    paddingHorizontal: 9,
-    backgroundColor: colors.successBackground,
-  },
-  permissionButtonDenied: {
-    backgroundColor: colors.errorBackground,
-  },
+
   permissionButtonText: {
-    fontSize: 14,
-    fontWeight: "700",
+    flexShrink: 1,
+    textAlign: "center",
+    fontSize: 15,
+    lineHeight: 21,
+    fontWeight: "600",
     color: colors.primary,
   },
-  permissionButtonRetryText: {
-    color: colors.error,
+
+  grantedRow: {
+    minHeight: 46,
+    marginTop: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
-  pressed: {
-    opacity: 0.7,
+
+  grantedText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.success,
   },
-  infoText: {
-    marginTop: 18,
+
+  statusMessage: {
+    marginTop: 12,
     fontSize: 13,
     lineHeight: 19,
-    color: "#6F7D8B",
+    color: colors.textSecondary,
   },
+
+  unavailableText: {
+    marginTop: 16,
+    fontSize: 13,
+    lineHeight: 20,
+    color: colors.textSecondary,
+  },
+
+  infoRow: {
+    marginTop: 20,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 9,
+    paddingHorizontal: 2,
+  },
+
+  infoIcon: {
+    marginTop: 2,
+  },
+
+  infoText: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 20,
+    color: colors.textSecondary,
+  },
+
+  message: {
+    marginTop: 16,
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.error,
+  },
+
   bottom: {
-    paddingHorizontal: 28,
+    paddingHorizontal: 24,
     paddingTop: 12,
     paddingBottom: 12,
+    backgroundColor: colors.background,
+  },
+
+  pressed: {
+    opacity: 0.75,
+  },
+
+  disabled: {
+    opacity: 0.6,
   },
 });

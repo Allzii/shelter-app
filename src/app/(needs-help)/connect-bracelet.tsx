@@ -1,4 +1,6 @@
+import { router, useLocalSearchParams } from "expo-router";
 import { Wifi } from "lucide-react-native";
+import { useRef, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -7,15 +9,85 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { colors } from "@/constants/colors";
+import { supabase } from "@/lib/supabase";
 
 export default function ConnectBraceletScreen() {
+  const params = useLocalSearchParams<{
+    recipientId?: string;
+    person?: string;
+    verification?: string;
+  }>();
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const saving = useRef(false);
+
+  const continueToHome = async () => {
+    if (saving.current) return;
+
+    if (!params.recipientId) {
+      setMessage(
+        "Kunde inte hitta registreringen. Gå tillbaka till Om dig och fortsätt därifrån."
+      );
+      return;
+    }
+
+    saving.current = true;
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      const { data: authData, error: authError } =
+        await supabase.auth.getUser();
+
+      if (authError || !authData.user) {
+        throw new Error("Session unavailable");
+      }
+
+      const { error } = await supabase
+        .from("help_recipients")
+        .update({
+          registration_completed_at: new Date().toISOString(),
+        })
+        .eq("id", params.recipientId)
+        .eq("account_id", authData.user.id)
+        .select("id")
+        .single();
+
+      if (error) throw error;
+
+      router.replace({
+        pathname: "/recipient-home",
+        params: {
+          recipientId: params.recipientId,
+          person: params.person === "other" ? "other" : "self",
+          verification: params.verification ?? "pending",
+        },
+      });
+    } catch (error) {
+      console.error("Slutföra registrering:", error);
+
+      const details =
+        typeof error === "object" &&
+          error !== null &&
+          "message" in error
+          ? String(error.message)
+          : "Okänt fel";
+
+      setMessage(`Kunde inte slutföra registreringen: ${details}`);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScreenHeader step="Steg 5 av 5" />
 
       <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
@@ -66,13 +138,32 @@ export default function ConnectBraceletScreen() {
             </View>
           </View>
 
-          <Text style={styles.braceletTitle}>Ditt armband</Text>
+          <Text style={styles.braceletTitle}>
+            Ditt armband
+          </Text>
 
           <Text style={styles.braceletDescription}>
             Här kommer du att kunna koppla ditt armband.
           </Text>
         </View>
       </ScrollView>
+
+      <View style={styles.bottom}>
+        {message !== "" && (
+          <Text
+            style={styles.message}
+            accessibilityLiveRegion="polite"
+          >
+            {message}
+          </Text>
+        )}
+
+        <PrimaryButton
+          title={isSaving ? "Sparar..." : "Till hemskärmen"}
+          disabled={isSaving}
+          onPress={() => void continueToHome()}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -81,6 +172,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+
+  scrollView: {
+    flex: 1,
   },
 
   content: {
@@ -109,7 +204,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingTop: 40,
-    paddingBottom: 60,
+    paddingBottom: 40,
   },
 
   illustration: {
@@ -250,5 +345,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     color: colors.textSecondary,
+  },
+
+  bottom: {
+    paddingHorizontal: 28,
+    paddingTop: 12,
+    paddingBottom: 12,
+    backgroundColor: colors.background,
+  },
+
+  message: {
+    marginBottom: 12,
+    textAlign: "center",
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.error,
   },
 });

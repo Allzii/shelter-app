@@ -1,11 +1,13 @@
 import { router } from "expo-router";
-import { MapPin } from "lucide-react-native";
+import { Info, MapPin, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
+  Modal,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -40,6 +42,7 @@ export default function HelperDetailsScreen() {
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [privacyVisible, setPrivacyVisible] = useState(false);
 
   const saving = useRef(false);
   const isBusy = isLoading || isSaving;
@@ -156,6 +159,11 @@ export default function HelperDetailsScreen() {
     }
   };
 
+  const openPrivacy = () => {
+    Keyboard.dismiss();
+    setPrivacyVisible(true);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScreenHeader step="Steg 2 av 5" />
@@ -180,6 +188,7 @@ export default function HelperDetailsScreen() {
           {isLoading ? (
             <View style={styles.loading}>
               <ActivityIndicator color={colors.primary} />
+
               <Text style={styles.loadingText}>
                 Hämtar uppgifter...
               </Text>
@@ -278,6 +287,88 @@ export default function HelperDetailsScreen() {
           />
         </View>
       </KeyboardAvoidingView>
+
+      <Modal
+        visible={privacyVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPrivacyVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View
+            style={styles.modalCard}
+            accessibilityViewIsModal
+          >
+            <View style={styles.modalHeader}>
+              <Text
+                style={styles.modalTitle}
+                accessibilityRole="header"
+              >
+                Dina personuppgifter
+              </Text>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Stäng informationen"
+                onPress={() => setPrivacyVisible(false)}
+                style={styles.closeButton}
+              >
+                <X size={23} color={colors.text} />
+              </Pressable>
+            </View>
+
+            <ScrollView
+              style={styles.modalScroll}
+              contentContainerStyle={styles.modalContent}
+              showsVerticalScrollIndicator={false}
+            >
+              <Text style={styles.sectionTitle}>
+                Varför vi behöver uppgifterna
+              </Text>
+
+              <Text style={styles.modalText}>
+                Uppgifterna du lämnar vid registreringen används
+                för att skapa din volontärprofil och samordna hjälp.
+              </Text>
+
+              <Text style={styles.sectionTitle}>
+                Uppgifter i din profil
+              </Text>
+
+              <Text style={styles.modalText}>
+                Ditt namn, telefonnummer och din adress sparas
+                tillsammans med ditt konto när du trycker på
+                Fortsätt.
+              </Text>
+
+              <Text style={styles.sectionTitle}>
+                Vad du kan hjälpa till med
+              </Text>
+
+              <Text style={styles.modalText}>
+                I nästa steg anger du vilken hjälp du kan
+                erbjuda. Uppgifterna används för att matcha dig
+                med personer som behöver hjälp.
+              </Text>
+
+              <Text style={styles.sectionTitle}>
+                Utbildningsintyg
+              </Text>
+
+              <Text style={styles.modalText}>
+                Om du laddar upp ett utbildningsintyg används
+                det för att kontrollera din utbildning innan
+                du kan börja hjälpa.
+              </Text>
+            </ScrollView>
+
+            <PrimaryButton
+              title="Stäng"
+              onPress={() => setPrivacyVisible(false)}
+            />
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -366,10 +457,115 @@ const styles = StyleSheet.create({
     color: colors.error,
   },
 
+  privacyCard: {
+    marginTop: 24,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderRadius: 14,
+    backgroundColor: "#F7FAFC",
+  },
+
+  infoIcon: {
+    marginTop: 2,
+  },
+
+  privacyContent: {
+    flex: 1,
+  },
+
+  privacyText: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: colors.textSecondary,
+  },
+
+  privacyLinkButton: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingTop: 4,
+  },
+
+  privacyLink: {
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: "600",
+    color: colors.primary,
+  },
+
   bottom: {
     paddingHorizontal: 28,
     paddingTop: 12,
     paddingBottom: 12,
     backgroundColor: colors.background,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(15, 30, 45, 0.4)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 48,
+  },
+
+  modalCard: {
+    width: "100%",
+    maxWidth: 440,
+    maxHeight: "100%",
+    padding: 22,
+    borderRadius: 22,
+    backgroundColor: colors.surface,
+  },
+
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+
+  modalTitle: {
+    flex: 1,
+    fontSize: 22,
+    lineHeight: 29,
+    fontWeight: "700",
+    color: colors.text,
+  },
+
+  closeButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  modalScroll: {
+    flexShrink: 1,
+  },
+
+  modalContent: {
+    paddingBottom: 24,
+  },
+
+  sectionTitle: {
+    marginTop: 14,
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: "700",
+    color: colors.text,
+  },
+
+  modalText: {
+    marginTop: 6,
+    fontSize: 14,
+    lineHeight: 22,
+    color: colors.textSecondary,
+  },
+
+  pressed: {
+    opacity: 0.82,
   },
 });
