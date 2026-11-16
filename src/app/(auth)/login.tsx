@@ -60,7 +60,7 @@ export default function LoginScreen() {
           setMessage("Fel e-postadress eller lösenord.");
         } else if (error.code === "email_not_confirmed") {
           setMessage(
-            "Bekräfta din e-postadress via mejlet innan du loggar in."
+            "Bekräfta din e-postadress via mejlet innan du loggar in.",
           );
         } else if (error.code === "over_request_rate_limit") {
           setMessage("För många försök. Vänta en stund och försök igen.");
@@ -81,7 +81,7 @@ export default function LoginScreen() {
       router.replace("/role");
     } catch {
       setMessage(
-        "Kunde inte ansluta. Kontrollera din internetanslutning och försök igen."
+        "Kunde inte ansluta. Kontrollera din internetanslutning och försök igen.",
       );
     } finally {
       submitting.current = false;
@@ -155,9 +155,7 @@ export default function LoginScreen() {
 
           <Pressable
             onPress={() =>
-              setMessage(
-                "Återställning av lösenord är inte ansluten ännu."
-              )
+              setMessage("Återställning av lösenord är inte ansluten ännu.")
             }
             accessibilityRole="button"
             disabled={isSubmitting}
@@ -170,10 +168,7 @@ export default function LoginScreen() {
           </Pressable>
 
           {message !== "" && (
-            <Text
-              style={styles.message}
-              accessibilityLiveRegion="polite"
-            >
+            <Text style={styles.message} accessibilityLiveRegion="polite">
               {message}
             </Text>
           )}
@@ -195,9 +190,7 @@ export default function LoginScreen() {
               pressed && styles.pressed,
             ]}
           >
-            <Text style={styles.linkText}>
-              Har du inget konto? Skapa konto
-            </Text>
+            <Text style={styles.linkText}>Har du inget konto? Skapa konto</Text>
           </Pressable>
         </View>
       </KeyboardAvoidingView>

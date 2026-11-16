@@ -1,28 +1,12 @@
 import { ArrowUpRight, MapPin } from "lucide-react-native";
 import { useState } from "react";
-import {
-  Linking,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { colors } from "@/constants/colors";
 
-type Coordinate = {
-  latitude: number;
-  longitude: number;
-};
+import type { ShelterMapProps } from "@/components/maps/types";
 
-type ShelterMapProps = {
-  shelter: Coordinate;
-  userLocation?: Coordinate;
-};
-
-export default function ShelterMap({
-  shelter,
-}: ShelterMapProps) {
+export default function ShelterMap({ shelter }: ShelterMapProps) {
   const [message, setMessage] = useState("");
 
   const openMap = async () => {
@@ -30,9 +14,7 @@ export default function ShelterMap({
 
     const url =
       "https://www.google.com/maps/search/?api=1&query=" +
-      encodeURIComponent(
-        `${shelter.latitude},${shelter.longitude}`
-      );
+      encodeURIComponent(`${shelter.latitude},${shelter.longitude}`);
 
     try {
       await Linking.openURL(url);
@@ -47,30 +29,19 @@ export default function ShelterMap({
         accessibilityRole="link"
         accessibilityLabel="Visa skyddsrummets position på Google Maps"
         onPress={() => void openMap()}
-        style={({ pressed }) => [
-          styles.container,
-          pressed && styles.pressed,
-        ]}
+        style={({ pressed }) => [styles.container, pressed && styles.pressed]}
       >
         <MapPin size={22} color={colors.primary} strokeWidth={1.7} />
 
         <View style={styles.linkRow}>
-          <Text style={styles.linkText}>
-            Öppna karta
-          </Text>
+          <Text style={styles.linkText}>Öppna karta</Text>
 
-          <ArrowUpRight
-            size={18}
-            color={colors.primary}
-          />
+          <ArrowUpRight size={18} color={colors.primary} />
         </View>
       </Pressable>
 
       {message !== "" && (
-        <Text
-          style={styles.message}
-          accessibilityLiveRegion="polite"
-        >
+        <Text style={styles.message} accessibilityLiveRegion="polite">
           {message}
         </Text>
       )}

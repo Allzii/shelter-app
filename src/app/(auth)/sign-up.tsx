@@ -64,7 +64,9 @@ export default function SignUpScreen() {
         setIsError(true);
 
         if (error.code === "user_already_exists") {
-          setMessage("Det finns redan ett konto med den e-postadressen. Logga in.");
+          setMessage(
+            "Det finns redan ett konto med den e-postadressen. Logga in.",
+          );
         } else if (error.code === "weak_password") {
           setMessage("Välj ett starkare lösenord.");
         } else if (
@@ -74,7 +76,7 @@ export default function SignUpScreen() {
           setMessage("För många försök. Vänta en stund och försök igen.");
         } else {
           setMessage(
-            "Kunde inte skapa kontot. Kontrollera uppgifterna och försök igen."
+            "Kunde inte skapa kontot. Kontrollera uppgifterna och försök igen.",
           );
         }
 
@@ -91,12 +93,12 @@ export default function SignUpScreen() {
 
       setAwaitingConfirmation(true);
       setMessage(
-        "Kontrollera din mejl och bekräfta e-postadressen om ett bekräftelsemejl har skickats. Logga sedan in. Har du redan ett konto kan du logga in direkt."
+        "Kontrollera din mejl och bekräfta e-postadressen om ett bekräftelsemejl har skickats. Logga sedan in. Har du redan ett konto kan du logga in direkt.",
       );
     } catch {
       setIsError(true);
       setMessage(
-        "Kunde inte ansluta. Kontrollera din internetanslutning och försök igen."
+        "Kunde inte ansluta. Kontrollera din internetanslutning och försök igen.",
       );
     } finally {
       submitting.current = false;

@@ -1,6 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
 import {
-  ChevronRight,
   CircleHelp,
   LockKeyhole,
   HandHeart,
@@ -8,16 +7,10 @@ import {
   RotateCcw,
   UserRound,
   Users,
-  Accessibility,
   Check,
   ChevronDown,
-  Footprints,
-  MapPin,
   Minus,
-  MoveUp,
-  PersonStanding,
   Plus,
-  type LucideIcon,
 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -37,13 +30,16 @@ import {
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
+import AddressFields from "@/components/ui/AddressFields";
 import FormInput from "@/components/ui/FormInput";
-import HelpOption from "@/components/ui/HelpOption";
 import NameFields from "@/components/ui/NameFields";
 import PhoneInput from "@/components/ui/PhoneInput";
-import ScreenHeader from "@/components/ui/ScreenHeader";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import ProfileRow from "@/components/ui/ProfileRow";
+import ScreenHeader from "@/components/ui/ScreenHeader";
 import { colors } from "@/constants/colors";
+import { relations } from "@/constants/relations";
+import HelpNeedsFields from "@/features/recipient/components/HelpNeedsFields";
 import { supabase } from "@/lib/supabase";
 import {
   capitalizeFirstLetter,
@@ -94,17 +90,6 @@ const emptyForm: FormData = {
   floor: 0,
   has_elevator: false,
 };
-
-const relations = [
-  "Partner",
-  "Förälder",
-  "Barn",
-  "Syskon",
-  "Annan släkting",
-  "Vän",
-  "Granne",
-  "Annat",
-];
 
 const sectionTitles: Record<Section, string> = {
   details: "Personuppgifter",
@@ -503,7 +488,7 @@ export default function RecipientProfileScreen() {
                       ) : (
                         <UserRound
                           size={29}
-                          color="#FFFFFF"
+                          color={colors.surface}
                           strokeWidth={1.8}
                         />
                       )}
@@ -718,70 +703,20 @@ export default function RecipientProfileScreen() {
                           forOtherPerson={isOtherPerson}
                         />
 
-                        <FormInput
-                          label="Adress"
-                          icon={MapPin}
-                          value={form.street}
-                          onChangeText={(value) =>
-                            updateForm("street", capitalizeFirstLetter(value))
+                        <AddressFields
+                          street={form.street}
+                          postalCode={form.postal_code}
+                          city={form.city}
+                          onStreetChange={(value) =>
+                            updateForm("street", value)
                           }
-                          placeholder={
-                            isOtherPerson
-                              ? "Personens gata och nummer"
-                              : "Gata och nummer"
+                          onPostalCodeChange={(value) =>
+                            updateForm("postal_code", value)
                           }
-                          autoCapitalize="words"
-                          autoComplete={
-                            isOtherPerson ? "off" : "street-address"
-                          }
+                          onCityChange={(value) => updateForm("city", value)}
                           editable={!isSaving && !formLoadFailed}
+                          forOtherPerson={isOtherPerson}
                         />
-
-                        <View style={styles.detailsAddressRow}>
-                          <View style={styles.detailsPostalInput}>
-                            <TextInput
-                              style={styles.detailsSmallInput}
-                              value={form.postal_code}
-                              onChangeText={(value) =>
-                                updateForm(
-                                  "postal_code",
-                                  formatPostalCode(value),
-                                )
-                              }
-                              placeholder="Postnummer"
-                              placeholderTextColor={colors.placeholder}
-                              accessibilityLabel={
-                                isOtherPerson
-                                  ? "Personens postnummer"
-                                  : "Postnummer"
-                              }
-                              keyboardType="number-pad"
-                              autoComplete={
-                                isOtherPerson ? "off" : "postal-code"
-                              }
-                              maxLength={6}
-                              editable={!isSaving && !formLoadFailed}
-                            />
-                          </View>
-
-                          <View style={styles.detailsCityInput}>
-                            <TextInput
-                              style={styles.detailsSmallInput}
-                              value={form.city}
-                              onChangeText={(value) =>
-                                updateForm("city", capitalizeFirstLetter(value))
-                              }
-                              placeholder="Ort"
-                              placeholderTextColor={colors.placeholder}
-                              accessibilityLabel={
-                                isOtherPerson ? "Personens ort" : "Ort"
-                              }
-                              autoCapitalize="words"
-                              autoComplete="off"
-                              editable={!isSaving && !formLoadFailed}
-                            />
-                          </View>
-                        </View>
                       </>
                     )}
                     {section === "contact" && (
@@ -924,56 +859,10 @@ export default function RecipientProfileScreen() {
                     {section === "needs" && (
                       <>
                         <View style={styles.needsOptions}>
-                          <HelpOption
-                            title="Rullstol"
-                            description={
-                              isOtherPerson
-                                ? "Personen använder rullstol och kan behöva hjälp att ta sig fram."
-                                : "Jag använder rullstol och kan behöva hjälp att ta mig fram."
-                            }
-                            icon={Accessibility}
-                            selected={form.selected_needs.includes(
-                              "wheelchair",
-                            )}
-                            onPress={() => toggleNeed("wheelchair")}
-                          />
-
-                          <HelpOption
-                            title="Svårt att gå längre sträckor"
-                            description={
-                              isOtherPerson
-                                ? "Personen går långsamt, använder gånghjälpmedel eller behöver ta pauser."
-                                : "Jag går långsamt, använder gånghjälpmedel eller behöver ta pauser."
-                            }
-                            icon={Footprints}
-                            selected={form.selected_needs.includes("walking")}
-                            onPress={() => toggleNeed("walking")}
-                          />
-
-                          <HelpOption
-                            title="Hjälp i trappor"
-                            description={
-                              isOtherPerson
-                                ? "Personen har svårt att ta sig upp eller ner för trappor."
-                                : "Jag har svårt att ta mig upp eller ner för trappor."
-                            }
-                            icon={MoveUp}
-                            selected={form.selected_needs.includes("stairs")}
-                            onPress={() => toggleNeed("stairs")}
-                          />
-
-                          <HelpOption
-                            title="Fysiskt stöd"
-                            description={
-                              isOtherPerson
-                                ? "Personen kan behöva stöd av en annan person när hen går."
-                                : "Jag kan behöva stöd av en annan person när jag går."
-                            }
-                            icon={PersonStanding}
-                            selected={form.selected_needs.includes(
-                              "physical-support",
-                            )}
-                            onPress={() => toggleNeed("physical-support")}
+                          <HelpNeedsFields
+                            selected={form.selected_needs}
+                            onToggle={toggleNeed}
+                            isOtherPerson={isOtherPerson}
                           />
                         </View>
 
@@ -1159,46 +1048,6 @@ export default function RecipientProfileScreen() {
   );
 }
 
-type ProfileRowProps = {
-  icon: LucideIcon;
-  title: string;
-  subtitle?: string;
-  last?: boolean;
-  onPress: () => void;
-};
-
-function ProfileRow({
-  icon: Icon,
-  title,
-  subtitle,
-  last = false,
-  onPress,
-}: ProfileRowProps) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.detailsRow,
-        !last && styles.detailsRowBorder,
-        pressed && styles.pressed,
-      ]}
-    >
-      <View style={styles.rowIcon}>
-        <Icon size={21} color={colors.primary} strokeWidth={1.7} />
-      </View>
-
-      <View style={styles.rowText}>
-        <Text style={styles.rowTitle}>{title}</Text>
-
-        {subtitle && <Text style={styles.rowSubtitle}>{subtitle}</Text>}
-      </View>
-
-      <ChevronRight size={20} color={colors.textSecondary} strokeWidth={1.7} />
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -1232,7 +1081,7 @@ const styles = StyleSheet.create({
   initials: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: colors.surface,
   },
 
   identityText: {
@@ -1252,7 +1101,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 20,
-    backgroundColor: "#E8F1F7",
+    backgroundColor: colors.primarySurface,
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
@@ -1281,28 +1130,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
 
-  detailsRow: {
-    minHeight: 84,
-    paddingHorizontal: 16,
-    paddingVertical: 18,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 13,
-  },
-
-  detailsRowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#EAF0F5",
-  },
-
-  rowIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: "#E8F1F7",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   keyboardView: {
     flex: 1,
   },
@@ -1331,24 +1158,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 14,
     lineHeight: 22,
-    color: colors.textSecondary,
-  },
-
-  rowText: {
-    flex: 1,
-  },
-
-  rowTitle: {
-    fontSize: 16,
-    lineHeight: 23,
-    fontWeight: "600",
-    color: colors.text,
-  },
-
-  rowSubtitle: {
-    marginTop: 4,
-    fontSize: 13,
-    lineHeight: 20,
     color: colors.textSecondary,
   },
 
@@ -1457,36 +1266,6 @@ const styles = StyleSheet.create({
   detailsContainer: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  detailsAddressRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 10,
-  },
-  detailsPostalInput: {
-    flex: 0.9,
-    height: 52,
-    justifyContent: "center",
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingHorizontal: 15,
-  },
-  detailsCityInput: {
-    flex: 1.1,
-    height: 52,
-    justifyContent: "center",
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingHorizontal: 15,
-  },
-  detailsSmallInput: {
-    flex: 1,
-    fontSize: 16,
-    color: colors.text,
   },
 
   contactRelationWrapper: {

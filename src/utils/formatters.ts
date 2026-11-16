@@ -19,7 +19,7 @@ export function formatPhoneNumber(value: string): string {
 
   return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)} ${numbers.slice(
     6,
-    8
+    8,
   )} ${numbers.slice(8, 10)}`;
 }
 
@@ -31,4 +31,25 @@ export function formatPostalCode(value: string): string {
   }
 
   return `${numbers.slice(0, 3)} ${numbers.slice(3)}`;
+}
+
+export function formatTime(value: string | null) {
+  if (!value) return "–";
+
+  const date = new Date(value);
+
+  return Number.isNaN(date.getTime())
+    ? "–"
+    : date.toLocaleTimeString("sv-SE", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+}
+
+export function formatDistance(metres: number) {
+  if (metres < 1_000) {
+    return `${Math.max(10, Math.round(metres / 10) * 10)} m`;
+  }
+
+  return `${(metres / 1_000).toFixed(1).replace(".", ",")} km`;
 }

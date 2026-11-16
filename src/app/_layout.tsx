@@ -5,7 +5,6 @@ import {
   useRootNavigationState,
   useSegments,
 } from "expo-router";
-import type { Session } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -20,6 +19,8 @@ import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
 import { colors } from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
+
+import type { Session } from "@supabase/supabase-js";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -46,19 +47,16 @@ export default function RootLayout() {
 
   const isAuthScreen = firstSegment === "(auth)";
 
-  const isStartScreen =
-    routeSegments.length === 0 || firstSegment === "index";
+  const isStartScreen = routeSegments.length === 0 || firstSegment === "index";
 
   const isRegistrationScreen =
     firstSegment === "(helper)" ||
     firstSegment === "(needs-help)" ||
     firstSegment === "role";
 
-  const isRecipientScreen =
-    firstSegment === "(recipient-tabs)";
+  const isRecipientScreen = firstSegment === "(recipient-tabs)";
 
-  const isPrivateScreen =
-    isRegistrationScreen || isRecipientScreen;
+  const isPrivateScreen = isRegistrationScreen || isRecipientScreen;
 
   const shouldChooseDestination =
     Boolean(accountId) && (isStartScreen || isAuthScreen);
@@ -69,9 +67,7 @@ export default function RootLayout() {
     }
 
     return (
-      new URLSearchParams(window.location.search).get(
-        "phonePreview"
-      ) === "true"
+      new URLSearchParams(window.location.search).get("phonePreview") === "true"
     );
   });
 
@@ -81,21 +77,18 @@ export default function RootLayout() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event, nextSession) => {
-        receivedAuthEvent = true;
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      receivedAuthEvent = true;
 
-        if (!isMounted) return;
+      if (!isMounted) return;
 
-        setSession(nextSession);
-        setIsLoadingSession(false);
-      }
-    );
+      setSession(nextSession);
+      setIsLoadingSession(false);
+    });
 
     const loadSession = async () => {
       try {
-        const { data, error } =
-          await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
 
         if (!isMounted || receivedAuthEvent) return;
 
@@ -130,12 +123,9 @@ export default function RootLayout() {
       }
     };
 
-    updateAutoRefresh(AppState.currentState);
+    updateAutoRefresh(AppState.currentState ?? "unknown");
 
-    const subscription = AppState.addEventListener(
-      "change",
-      updateAutoRefresh
-    );
+    const subscription = AppState.addEventListener("change", updateAutoRefresh);
 
     return () => {
       subscription.remove();
@@ -149,12 +139,7 @@ export default function RootLayout() {
     if (!accountId && isPrivateScreen) {
       router.replace("/login");
     }
-  }, [
-    accountId,
-    isLoadingSession,
-    navigationState?.key,
-    isPrivateScreen,
-  ]);
+  }, [accountId, isLoadingSession, navigationState?.key, isPrivateScreen]);
 
   useEffect(() => {
     if (
@@ -192,24 +177,42 @@ export default function RootLayout() {
             pathname: "/recipient-home",
             params: {
               recipientId: data.id,
-              person:
-                data.registration_for === "other"
-                  ? "other"
-                  : "self",
+              person: data.registration_for === "other" ? "other" : "self",
             },
           });
 
           return;
         }
 
-        // Konton utan färdig hjälpsökarregistrering
-        // går tills vidare till rollvalet.
+        const [helperProfile, helperCertificate] = await Promise.all([
+          supabase
+            .from("helper_profiles")
+            .select("account_id")
+            .eq("account_id", accountId)
+            .maybeSingle(),
+          supabase
+            .from("helper_certificates")
+            .select("account_id")
+            .eq("account_id", accountId)
+            .eq("status", "approved")
+            .maybeSingle(),
+        ]);
+
+        if (helperProfile.error) throw helperProfile.error;
+        if (helperCertificate.error) throw helperCertificate.error;
+        if (!active) return;
+
+        if (helperProfile.data && helperCertificate.data) {
+          router.replace("/helper-home");
+          return;
+        }
+
         router.replace("/role");
       } catch {
         if (!active) return;
 
         setNavigationMessage(
-          "Kunde inte hämta din registrering. Kontrollera anslutningen och försök igen."
+          "Kunde inte hämta din registrering. Kontrollera anslutningen och försök igen.",
         );
       }
     };
@@ -242,17 +245,10 @@ export default function RootLayout() {
       />
 
       {showLoadingScreen && (
-        <View
-          style={styles.loadingOverlay}
-          accessibilityViewIsModal
-        >
-          {shouldChooseDestination &&
-            navigationMessage !== "" ? (
+        <View style={styles.loadingOverlay} accessibilityViewIsModal>
+          {shouldChooseDestination && navigationMessage !== "" ? (
             <>
-              <Text
-                style={styles.message}
-                accessibilityLiveRegion="polite"
-              >
+              <Text style={styles.message} accessibilityLiveRegion="polite">
                 {navigationMessage}
               </Text>
 
@@ -260,30 +256,21 @@ export default function RootLayout() {
                 accessibilityRole="button"
                 onPress={() => {
                   setNavigationMessage("");
-                  setNavigationAttempt(
-                    (current) => current + 1
-                  );
+                  setNavigationAttempt((current) => current + 1);
                 }}
                 style={({ pressed }) => [
                   styles.retryButton,
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={styles.retryText}>
-                  Försök igen
-                </Text>
+                <Text style={styles.retryText}>Försök igen</Text>
               </Pressable>
             </>
           ) : (
             <>
-              <ActivityIndicator
-                size="large"
-                color={colors.primary}
-              />
+              <ActivityIndicator size="large" color={colors.primary} />
 
-              <Text style={styles.loadingText}>
-                Öppnar appen…
-              </Text>
+              <Text style={styles.loadingText}>Öppnar appen…</Text>
             </>
           )}
         </View>

@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router";
 
-import VerificationScreen from "@/components/ui/VerificationScreen";
+import VerificationScreen from "@/features/registration/components/VerificationScreen";
 
 export default function NeedsHelpVerificationScreen() {
   const { person } = useLocalSearchParams<{
@@ -9,9 +9,7 @@ export default function NeedsHelpVerificationScreen() {
 
   const isOtherPerson = person === "other";
 
-  const continueRegistration = (
-    verification: "demo-verified" | "pending"
-  ) => {
+  const continueRegistration = (verification: "demo-verified" | "pending") => {
     router.push({
       pathname: "/needs-help",
       params: {

@@ -1,5 +1,4 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { MapPin } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -9,23 +8,18 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import FormInput from "@/components/ui/FormInput";
+import AddressFields from "@/components/ui/AddressFields";
 import NameFields from "@/components/ui/NameFields";
 import PhoneInput from "@/components/ui/PhoneInput";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { colors } from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
-import {
-  capitalizeFirstLetter,
-  formatPhoneNumber,
-  formatPostalCode,
-} from "@/utils/formatters";
+import { formatPhoneNumber, formatPostalCode } from "@/utils/formatters";
 
 export default function NeedsHelpScreen() {
   const params = useLocalSearchParams<{
@@ -38,9 +32,7 @@ export default function NeedsHelpScreen() {
 
   // Prototypens status är separat från riktig verifiering i databasen.
   const verification =
-    params.verification === "demo-verified"
-      ? "demo-verified"
-      : "pending";
+    params.verification === "demo-verified" ? "demo-verified" : "pending";
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -77,9 +69,7 @@ export default function NeedsHelpScreen() {
 
         const { data, error } = await supabase
           .from("help_recipients")
-          .select(
-            "id, first_name, last_name, phone, street, postal_code, city"
-          )
+          .select("id, first_name, last_name, phone, street, postal_code, city")
           .eq("account_id", authData.user.id)
           .eq("registration_for", person)
           .order("created_at", { ascending: false })
@@ -103,7 +93,7 @@ export default function NeedsHelpScreen() {
 
         setLoadFailed(true);
         setMessage(
-          "Kunde inte hämta dina sparade uppgifter. Kontrollera anslutningen och försök igen."
+          "Kunde inte hämta dina sparade uppgifter. Kontrollera anslutningen och försök igen.",
         );
       } finally {
         if (isMounted) {
@@ -178,7 +168,7 @@ export default function NeedsHelpScreen() {
       });
     } catch {
       setMessage(
-        "Kunde inte spara uppgifterna. Kontrollera anslutningen och försök igen."
+        "Kunde inte spara uppgifterna. Kontrollera anslutningen och försök igen.",
       );
 
       // Läs tillbaka innan nästa försök. Sparandet kan ha nått databasen
@@ -244,69 +234,21 @@ export default function NeedsHelpScreen() {
                 forOtherPerson={isOtherPerson}
               />
 
-              <FormInput
-                label="Adress"
-                icon={MapPin}
-                value={street}
-                onChangeText={(value) =>
-                  setStreet(capitalizeFirstLetter(value))
-                }
-                placeholder={
-                  isOtherPerson
-                    ? "Personens gata och nummer"
-                    : "Gata och nummer"
-                }
-                autoCapitalize="words"
-                autoComplete={isOtherPerson ? "off" : "street-address"}
+              <AddressFields
+                street={street}
+                postalCode={postalCode}
+                city={city}
+                onStreetChange={setStreet}
+                onPostalCodeChange={setPostalCode}
+                onCityChange={setCity}
                 editable={!isSaving && !loadFailed}
+                forOtherPerson={isOtherPerson}
               />
-
-              <View style={styles.addressRow}>
-                <View style={styles.postalInput}>
-                  <TextInput
-                    style={styles.smallInput}
-                    value={postalCode}
-                    onChangeText={(value) =>
-                      setPostalCode(formatPostalCode(value))
-                    }
-                    placeholder="Postnummer"
-                    placeholderTextColor={colors.placeholder}
-                    accessibilityLabel={
-                      isOtherPerson ? "Personens postnummer" : "Postnummer"
-                    }
-                    keyboardType="number-pad"
-                    autoComplete={isOtherPerson ? "off" : "postal-code"}
-                    maxLength={6}
-                    editable={!isSaving && !loadFailed}
-                  />
-                </View>
-
-                <View style={styles.cityInput}>
-                  <TextInput
-                    style={styles.smallInput}
-                    value={city}
-                    onChangeText={(value) =>
-                      setCity(capitalizeFirstLetter(value))
-                    }
-                    placeholder="Ort"
-                    placeholderTextColor={colors.placeholder}
-                    accessibilityLabel={
-                      isOtherPerson ? "Personens ort" : "Ort"
-                    }
-                    autoCapitalize="words"
-                    autoComplete="off"
-                    editable={!isSaving && !loadFailed}
-                  />
-                </View>
-              </View>
             </View>
           )}
 
           {message !== "" && (
-            <Text
-              style={styles.message}
-              accessibilityLiveRegion="polite"
-            >
+            <Text style={styles.message} accessibilityLiveRegion="polite">
               {message}
             </Text>
           )}
@@ -377,36 +319,6 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 15,
     color: colors.textSecondary,
-  },
-  addressRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 10,
-  },
-  postalInput: {
-    flex: 0.9,
-    height: 52,
-    justifyContent: "center",
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingHorizontal: 15,
-  },
-  cityInput: {
-    flex: 1.1,
-    height: 52,
-    justifyContent: "center",
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingHorizontal: 15,
-  },
-  smallInput: {
-    flex: 1,
-    fontSize: 16,
-    color: colors.text,
   },
   message: {
     marginTop: 16,

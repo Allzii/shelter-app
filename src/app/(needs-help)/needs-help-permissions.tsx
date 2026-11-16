@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router";
 
-import PermissionsScreen from "@/components/ui/PermissionsScreen";
+import PermissionsScreen from "@/features/registration/components/PermissionsScreen";
 
 export default function NeedsHelpPermissionsScreen() {
   const params = useLocalSearchParams<{
@@ -23,9 +23,7 @@ export default function NeedsHelpPermissionsScreen() {
         recipientId: params.recipientId,
         person: isOtherPerson ? "other" : "self",
         verification:
-          params.verification === "demo-verified"
-            ? "demo-verified"
-            : "pending",
+          params.verification === "demo-verified" ? "demo-verified" : "pending",
       },
     });
   };

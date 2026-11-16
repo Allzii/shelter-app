@@ -31,6 +31,9 @@ Kör i terminalen, från mappen `shelter-app`:
 npm ci
 ```
 
+Kopiera `.env.example` till `.env.local` och fyll i projektets publika
+Supabase-URL och nyckel innan du startar appen.
+
 ### Windows / PowerShell
 
 Om du får ett fel om att `npm.ps1` inte får köras, använd `npm.cmd` i stället för `npm` och `npx.cmd` i stället för `npx`:
@@ -97,3 +100,40 @@ npx.cmd expo start --lan
 ```
 
 Om du själv har ändrat kod, committa dina ändringar innan du kör `git pull`.
+
+## Hitta i koden
+
+- `src/app/` – Expo Routers sidor och navigation.
+- `src/features/helper/` – skärmar och komponenter för volontärer.
+- `src/features/recipient/` – skärmar och komponenter för den som får hjälp.
+- `src/features/registration/` – gemensamma skärmar för verifiering och behörigheter.
+- `src/components/ui/` – återanvändbara fält, knappar, profilrader och rubriker.
+- `src/components/maps/` – kartvyer och skyddsrumskort. `.native.tsx` används på telefonen; `.tsx` är webbversionen.
+- `src/hooks/` – gemensam React-logik, bland annat omladdning när en skärm visas.
+- `src/services/` – hämtning och bearbetning av externa data, till exempel skyddsrum.
+- `src/constants/`, `src/types/`, `src/utils/` – gemensamma val, datatyper och formattering.
+- `docs/design/` – sparade designreferenser.
+
+Lägg gemensamma formulärdelar i `components/ui` och rollspecifika delar i respektive
+`features`-mapp. Alternativens ID:n i `constants/help-options.ts` används även i
+sparade profiler och ska behållas när texter eller ikoner ändras.
+
+## Kontrollera ändringar
+
+```sh
+npm run format
+npm run check
+```
+
+`format` formaterar koden med Prettier. `check` kör TypeScript, ESLint och
+kontrollerar formatteringen. I PowerShell kan du använda `npm.cmd`.
+
+Lokala säkerhetskopior ligger i `backups/` och följer inte med i Git.
+
+Adressbaserade uppdragsavstånd och deras databasändring beskrivs i
+[docs/address-distances.md](docs/address-distances.md).
+
+Bekräftat avslut av uppdrag aktiveras med
+`supabase/confirm-help-completion.sql` i projektets SQL Editor. Volontären ber om
+bekräftelse; kontot som skapade förfrågan bekräftar eller anger att hjälp
+fortfarande behövs. SQL-filen inkluderar även återöppning när volontären avbryter.

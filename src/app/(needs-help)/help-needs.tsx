@@ -1,12 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import {
-  Accessibility,
-  Footprints,
-  Minus,
-  MoveUp,
-  PersonStanding,
-  Plus,
-} from "lucide-react-native";
+import { Minus, Plus } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -23,10 +16,10 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import HelpOption from "@/components/ui/HelpOption";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { colors } from "@/constants/colors";
+import HelpNeedsFields from "@/features/recipient/components/HelpNeedsFields";
 import { supabase } from "@/lib/supabase";
 
 export default function HelpNeedsScreen() {
@@ -41,9 +34,7 @@ export default function HelpNeedsScreen() {
   const person = isOtherPerson ? "other" : "self";
 
   const verification =
-    params.verification === "demo-verified"
-      ? "demo-verified"
-      : "pending";
+    params.verification === "demo-verified" ? "demo-verified" : "pending";
 
   const [selectedNeeds, setSelectedNeeds] = useState<string[]>([]);
   const [additionalInfo, setAdditionalInfo] = useState("");
@@ -75,9 +66,7 @@ export default function HelpNeedsScreen() {
 
         const { data, error } = await supabase
           .from("help_needs")
-          .select(
-            "selected_needs, additional_info, floor, has_elevator"
-          )
+          .select("selected_needs, additional_info, floor, has_elevator")
           .eq("recipient_id", recipientId)
           .maybeSingle();
 
@@ -95,7 +84,7 @@ export default function HelpNeedsScreen() {
         setMessage(
           recipientId
             ? "Kunde inte hämta hjälpbehoven. Kontrollera anslutningen och försök igen."
-            : "Personkopplingen saknas. Gå tillbaka till Om dig och fortsätt därifrån."
+            : "Personkopplingen saknas. Gå tillbaka till Om dig och fortsätt därifrån.",
         );
       } finally {
         if (isMounted) {
@@ -117,7 +106,7 @@ export default function HelpNeedsScreen() {
     setSelectedNeeds((previous) =>
       previous.includes(need)
         ? previous.filter((item) => item !== need)
-        : [...previous, need]
+        : [...previous, need],
     );
   };
 
@@ -129,7 +118,7 @@ export default function HelpNeedsScreen() {
 
     if (!recipientId) {
       setMessage(
-        "Personkopplingen saknas. Gå tillbaka till Om dig och fortsätt därifrån."
+        "Personkopplingen saknas. Gå tillbaka till Om dig och fortsätt därifrån.",
       );
       return;
     }
@@ -148,14 +137,14 @@ export default function HelpNeedsScreen() {
             floor,
             has_elevator: hasElevator,
           },
-          { onConflict: "recipient_id" }
+          { onConflict: "recipient_id" },
         )
         .select("recipient_id")
         .single();
 
       if (error) {
         setMessage(
-          "Kunde inte spara hjälpbehoven. Kontrollera anslutningen och försök igen."
+          "Kunde inte spara hjälpbehoven. Kontrollera anslutningen och försök igen.",
         );
         return;
       }
@@ -170,7 +159,7 @@ export default function HelpNeedsScreen() {
       });
     } catch {
       setMessage(
-        "Kunde inte ansluta. Kontrollera din internetanslutning och försök igen."
+        "Kunde inte ansluta. Kontrollera din internetanslutning och försök igen.",
       );
     } finally {
       saving.current = false;
@@ -208,61 +197,15 @@ export default function HelpNeedsScreen() {
           {isLoading ? (
             <View style={styles.loading}>
               <ActivityIndicator color={colors.primary} />
-              <Text style={styles.loadingText}>
-                Hämtar hjälpbehov...
-              </Text>
+              <Text style={styles.loadingText}>Hämtar hjälpbehov...</Text>
             </View>
           ) : (
-            <View
-              pointerEvents={isFormDisabled ? "none" : "auto"}
-            >
+            <View pointerEvents={isFormDisabled ? "none" : "auto"}>
               <View style={styles.options}>
-                <HelpOption
-                  title="Rullstol"
-                  description={
-                    isOtherPerson
-                      ? "Personen använder rullstol och kan behöva hjälp att ta sig fram."
-                      : "Jag använder rullstol och kan behöva hjälp att ta mig fram."
-                  }
-                  icon={Accessibility}
-                  selected={selectedNeeds.includes("wheelchair")}
-                  onPress={() => toggleNeed("wheelchair")}
-                />
-
-                <HelpOption
-                  title="Svårt att gå längre sträckor"
-                  description={
-                    isOtherPerson
-                      ? "Personen går långsamt, använder gånghjälpmedel eller behöver ta pauser."
-                      : "Jag går långsamt, använder gånghjälpmedel eller behöver ta pauser."
-                  }
-                  icon={Footprints}
-                  selected={selectedNeeds.includes("walking")}
-                  onPress={() => toggleNeed("walking")}
-                />
-
-                <HelpOption
-                  title="Hjälp i trappor"
-                  description={
-                    isOtherPerson
-                      ? "Personen har svårt att ta sig upp eller ner för trappor."
-                      : "Jag har svårt att ta mig upp eller ner för trappor."
-                  }
-                  icon={MoveUp}
-                  selected={selectedNeeds.includes("stairs")}
-                  onPress={() => toggleNeed("stairs")}
-                />
-
-                <HelpOption
-                  title="Fysiskt stöd"
-                  description={
-                    isOtherPerson
-                      ? "Personen kan behöva stöd av en annan person när hen går."
-                      : "Jag kan behöva stöd av en annan person när jag går."
-                  }
-                  icon={PersonStanding}
-                  selected={selectedNeeds.includes("physical-support")}
-                  onPress={() => toggleNeed("physical-support")}
+                <HelpNeedsFields
+                  selected={selectedNeeds}
+                  onToggle={toggleNeed}
+                  isOtherPerson={isOtherPerson}
                 />
               </View>
 
@@ -275,9 +218,7 @@ export default function HelpNeedsScreen() {
                   <View style={styles.homeRow}>
                     <View style={styles.homeDetails}>
                       <Text style={styles.homeLabel}>Våningsplan</Text>
-                      <Text style={styles.homeDescription}>
-                        0 = entréplan
-                      </Text>
+                      <Text style={styles.homeDescription}>0 = entréplan</Text>
                     </View>
 
                     <View style={styles.floorControls}>
@@ -293,8 +234,7 @@ export default function HelpNeedsScreen() {
                         }
                         style={({ pressed }) => [
                           styles.floorButton,
-                          (floor === 0 || isFormDisabled) &&
-                            styles.disabled,
+                          (floor === 0 || isFormDisabled) && styles.disabled,
                           pressed && styles.pressed,
                         ]}
                       >
@@ -330,9 +270,7 @@ export default function HelpNeedsScreen() {
 
                   <View style={[styles.homeRow, styles.elevatorRow]}>
                     <View style={styles.homeDetails}>
-                      <Text style={styles.homeLabel}>
-                        Hiss i byggnaden
-                      </Text>
+                      <Text style={styles.homeLabel}>Hiss i byggnaden</Text>
                       <Text style={styles.homeDescription}>
                         {hasElevator ? "Hiss finns" : "Ingen hiss"}
                       </Text>
@@ -384,10 +322,7 @@ export default function HelpNeedsScreen() {
           )}
 
           {message !== "" && (
-            <Text
-              style={styles.message}
-              accessibilityLiveRegion="polite"
-            >
+            <Text style={styles.message} accessibilityLiveRegion="polite">
               {message}
             </Text>
           )}

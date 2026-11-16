@@ -5,6 +5,8 @@ import MapView, { Marker } from "react-native-maps";
 
 import { colors } from "@/constants/colors";
 
+import type { ShelterMapProps } from "@/components/maps/types";
+
 const mapStyle = [
   {
     elementType: "geometry",
@@ -43,26 +45,13 @@ const mapStyle = [
   },
 ];
 
-type Coordinate = {
-  latitude: number;
-  longitude: number;
-};
-
-type ShelterMapProps = {
-  shelter: Coordinate;
-  userLocation?: Coordinate;
-};
-
 const METRES_PER_LATITUDE_DEGREE = 111_320;
 
 const MINIMUM_VISIBLE_HEIGHT_METRES = 100;
 
 const EDGE_PADDING = 40;
 
-export default function ShelterMap({
-  shelter,
-  userLocation,
-}: ShelterMapProps) {
+export default function ShelterMap({ shelter, userLocation }: ShelterMapProps) {
   const [mapSize, setMapSize] = useState({
     width: 320,
     height: 210,
@@ -90,25 +79,18 @@ export default function ShelterMap({
   // beroende på hur långt norrut kartan ligger.
   const latitudeCorrection = Math.max(
     0.01,
-    Math.cos((latitude * Math.PI) / 180)
+    Math.cos((latitude * Math.PI) / 180),
   );
 
-  const usableWidth = Math.max(
-    1,
-    mapSize.width - EDGE_PADDING * 2
-  );
+  const usableWidth = Math.max(1, mapSize.width - EDGE_PADDING * 2);
 
-  const usableHeight = Math.max(
-    1,
-    mapSize.height - EDGE_PADDING * 2
-  );
+  const usableHeight = Math.max(1, mapSize.height - EDGE_PADDING * 2);
 
   const horizontalFraction = usableWidth / mapSize.width;
   const verticalFraction = usableHeight / mapSize.height;
 
   const minimumLatitudeDelta =
-    MINIMUM_VISIBLE_HEIGHT_METRES /
-    METRES_PER_LATITUDE_DEGREE;
+    MINIMUM_VISIBLE_HEIGHT_METRES / METRES_PER_LATITUDE_DEGREE;
 
   // Ta hänsyn till både nord–sydligt och öst–västligt
   // avstånd, så att båda punkterna får plats.
@@ -117,11 +99,10 @@ export default function ShelterMap({
     (longitudeDifference * latitudeCorrection) /
       aspectRatio /
       horizontalFraction,
-    minimumLatitudeDelta
+    minimumLatitudeDelta,
   );
 
-  const longitudeDelta =
-    (latitudeDelta * aspectRatio) / latitudeCorrection;
+  const longitudeDelta = (latitudeDelta * aspectRatio) / latitudeCorrection;
 
   return (
     <View
@@ -132,10 +113,7 @@ export default function ShelterMap({
         if (width <= 0 || height <= 0) return;
 
         setMapSize((current) => {
-          if (
-            current.width === width &&
-            current.height === height
-          ) {
+          if (current.width === width && current.height === height) {
             return current;
           }
 
@@ -184,11 +162,7 @@ export default function ShelterMap({
           zIndex={2}
         >
           <View style={styles.shelterMarker}>
-            <House
-              size={16}
-              color="#FFFFFF"
-              strokeWidth={2}
-            />
+            <House size={16} color={colors.surface} strokeWidth={2} />
           </View>
         </Marker>
       </MapView>
@@ -213,7 +187,7 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: "#FFFFFF",
+    borderColor: colors.surface,
     backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
@@ -233,7 +207,7 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: "#FFFFFF",
+    borderColor: colors.surface,
     backgroundColor: "#59A6E0",
   },
 });

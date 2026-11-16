@@ -41,3 +41,10 @@ example
 # generated native folders
 /ios
 /android
+
+# Local backups and generated previews
+/backups/
+/output/
+
+# Supabase CLI cache
+/supabase/.temp/

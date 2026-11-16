@@ -1,12 +1,9 @@
-import { Check, LucideIcon } from "lucide-react-native";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Check } from "lucide-react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { colors } from "@/constants/colors";
+
+import type { LucideIcon } from "lucide-react-native";
 
 type HelpOptionProps = {
   title: string;
@@ -33,10 +30,7 @@ export default function HelpOption({
       ]}
     >
       <View
-        style={[
-          styles.iconContainer,
-          selected && styles.iconContainerSelected,
-        ]}
+        style={[styles.iconContainer, selected && styles.iconContainerSelected]}
       >
         <Icon
           size={26}
@@ -45,28 +39,13 @@ export default function HelpOption({
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.title}>
-          {title}
-        </Text>
+        <Text style={styles.title}>{title}</Text>
 
-        <Text style={styles.description}>
-          {description}
-        </Text>
+        <Text style={styles.description}>{description}</Text>
       </View>
 
-      <View
-        style={[
-          styles.checkbox,
-          selected && styles.checkboxSelected,
-        ]}
-      >
-        {selected && (
-          <Check
-            size={18}
-            color={colors.surface}
-            strokeWidth={3}
-          />
-        )}
+      <View style={[styles.checkbox, selected && styles.checkboxSelected]}>
+        {selected && <Check size={18} color={colors.surface} strokeWidth={3} />}
       </View>
     </Pressable>
   );

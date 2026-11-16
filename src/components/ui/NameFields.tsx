@@ -28,9 +28,7 @@ export default function NameFields({
           onFirstNameChange(capitalizeFirstLetter(value))
         }
         placeholder={
-          forOtherPerson
-            ? "Skriv personens förnamn"
-            : "Skriv ditt förnamn"
+          forOtherPerson ? "Skriv personens förnamn" : "Skriv ditt förnamn"
         }
         autoCapitalize="words"
         autoComplete={forOtherPerson ? "off" : "given-name"}
@@ -40,13 +38,9 @@ export default function NameFields({
         label="Efternamn"
         icon={User}
         value={lastName}
-        onChangeText={(value) =>
-          onLastNameChange(capitalizeFirstLetter(value))
-        }
+        onChangeText={(value) => onLastNameChange(capitalizeFirstLetter(value))}
         placeholder={
-          forOtherPerson
-            ? "Skriv personens efternamn"
-            : "Skriv ditt efternamn"
+          forOtherPerson ? "Skriv personens efternamn" : "Skriv ditt efternamn"
         }
         autoCapitalize="words"
         autoComplete={forOtherPerson ? "off" : "family-name"}

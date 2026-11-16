@@ -1,15 +1,8 @@
-import { router, useFocusEffect } from "expo-router";
-import {
-  Award,
-  Check,
-  Clock,
-  FileText,
-  Users,
-} from "lucide-react-native";
+import { router } from "expo-router";
+import { Award, Check } from "lucide-react-native";
 import { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -21,23 +14,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { colors } from "@/constants/colors";
+import useReloadableFocusEffect from "@/hooks/useReloadableFocusEffect";
 import { supabase } from "@/lib/supabase";
 
-type Certificate = {
-  status: "pending" | "approved" | "needs_changes";
-  review_note: string | null;
-};
+import type { CertificateReview as Certificate } from "@/types/certificate";
 
 export default function HelperCertificationScreen() {
-  const [certificate, setCertificate] =
-    useState<Certificate | null>(null);
+  const [certificate, setCertificate] = useState<Certificate | null>(null);
 
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState("");
-  const [loadAttempt, setLoadAttempt] = useState(0);
 
-  const [warningVisible, setWarningVisible] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutMessage, setLogoutMessage] = useState("");
 
@@ -49,7 +37,7 @@ export default function HelperCertificationScreen() {
   const isPending = certificate?.status === "pending";
   const needsChanges = certificate?.status === "needs_changes";
 
-  useFocusEffect(
+  const reload = useReloadableFocusEffect(
     useCallback(() => {
       let active = true;
 
@@ -67,19 +55,18 @@ export default function HelperCertificationScreen() {
             throw new Error("Session unavailable");
           }
 
-          const { data: profile, error: profileError } =
-            await supabase
-              .from("helper_profiles")
-              .select("account_id")
-              .eq("account_id", authData.user.id)
-              .maybeSingle();
+          const { data: profile, error: profileError } = await supabase
+            .from("helper_profiles")
+            .select("account_id")
+            .eq("account_id", authData.user.id)
+            .maybeSingle();
 
           if (profileError) throw profileError;
           if (!active) return;
 
           if (!profile) {
             setMessage(
-              "Din volontärprofil saknas. Gå tillbaka och spara dina uppgifter på Om dig."
+              "Din volontärprofil saknas. Gå tillbaka och spara dina uppgifter på Om dig.",
             );
             return;
           }
@@ -95,24 +82,18 @@ export default function HelperCertificationScreen() {
 
           if (
             data &&
-            !["pending", "approved", "needs_changes"].includes(
-              data.status
-            )
+            !["pending", "approved", "needs_changes"].includes(data.status)
           ) {
             throw new Error("Unknown certificate status");
           }
 
           setCertificate(data as Certificate | null);
           setProfileLoaded(true);
-
-          if (data?.status === "approved") {
-            setWarningVisible(false);
-          }
         } catch {
           if (!active) return;
 
           setMessage(
-            "Kunde inte hämta din certifiering. Kontrollera anslutningen och försök igen."
+            "Kunde inte hämta din certifiering. Kontrollera anslutningen och försök igen.",
           );
         } finally {
           if (active) setIsLoading(false);
@@ -124,7 +105,7 @@ export default function HelperCertificationScreen() {
       return () => {
         active = false;
       };
-    }, [loadAttempt])
+    }, []),
   );
 
   const handleLogout = async () => {
@@ -151,30 +132,13 @@ export default function HelperCertificationScreen() {
   };
 
   const handleHome = () => {
-    if (
-      isLoading ||
-      isLoggingOut ||
-      !profileLoaded ||
-      message !== ""
-    ) {
-      return;
-    }
+    if (isLoading || isLoggingOut || !profileLoaded || message !== "") return;
 
-    if (!isApproved) {
-      setWarningVisible(true);
-      return;
-    }
-
-    // Navigation läggs till när hemskärmen har skapats.
-  };
-
-  const openTraining = () => {
-    setWarningVisible(false);
-    router.push("/helper-training");
+    router.replace("/helper-home");
   };
 
   const refreshStatus = () => {
-    setLoadAttempt((current) => current + 1);
+    reload();
   };
 
   const trainingDescription = isApproved
@@ -199,16 +163,10 @@ export default function HelperCertificationScreen() {
         <View style={styles.main}>
           <View style={styles.heading}>
             <View
-              style={[
-                styles.iconCircle,
-                isCompact && styles.iconCircleCompact,
-              ]}
+              style={[styles.iconCircle, isCompact && styles.iconCircleCompact]}
             >
               {isLoading ? (
-                <ActivityIndicator
-                  size="large"
-                  color={colors.primary}
-                />
+                <ActivityIndicator size="large" color={colors.primary} />
               ) : (
                 <Award
                   size={isCompact ? 48 : 58}
@@ -218,12 +176,7 @@ export default function HelperCertificationScreen() {
               )}
             </View>
 
-            <Text
-              style={[
-                styles.title,
-                isCompact && styles.titleCompact,
-              ]}
-            >
+            <Text style={[styles.title, isCompact && styles.titleCompact]}>
               {isLoading
                 ? "Hämtar din certifiering"
                 : isApproved
@@ -257,10 +210,7 @@ export default function HelperCertificationScreen() {
           )}
 
           {message !== "" && (
-            <Text
-              style={styles.message}
-              accessibilityLiveRegion="polite"
-            >
+            <Text style={styles.message} accessibilityLiveRegion="polite">
               {message}
             </Text>
           )}
@@ -277,21 +227,13 @@ export default function HelperCertificationScreen() {
         ) : (
           <PrimaryButton
             title={isLoading ? "Hämtar..." : "Till hemskärmen"}
-            disabled={
-              isLoading ||
-              isLoggingOut ||
-              !profileLoaded ||
-              isApproved
-            }
+            disabled={isLoading || isLoggingOut || !profileLoaded}
             onPress={handleHome}
           />
         )}
 
         {logoutMessage !== "" && (
-          <Text
-            style={styles.message}
-            accessibilityLiveRegion="polite"
-          >
+          <Text style={styles.message} accessibilityLiveRegion="polite">
             {logoutMessage}
           </Text>
         )}
@@ -311,10 +253,7 @@ export default function HelperCertificationScreen() {
           ]}
         >
           {isLoggingOut && (
-            <ActivityIndicator
-              size="small"
-              color={colors.primary}
-            />
+            <ActivityIndicator size="small" color={colors.primary} />
           )}
 
           <Text style={styles.textButtonText}>
@@ -322,135 +261,6 @@ export default function HelperCertificationScreen() {
           </Text>
         </Pressable>
       </View>
-
-      <Modal
-        visible={warningVisible}
-        animationType="slide"
-        onRequestClose={() => setWarningVisible(false)}
-      >
-        <SafeAreaView style={styles.container}>
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.warningContent}
-            showsVerticalScrollIndicator={false}
-            bounces={false}
-          >
-            <View style={styles.warningMain}>
-              <View style={styles.eyebrow}>
-                <Users
-                  size={20}
-                  color={colors.primary}
-                  strokeWidth={1.8}
-                />
-
-                <Text style={styles.eyebrowText}>
-                  Nära dig
-                </Text>
-              </View>
-
-              <Text
-                style={[
-                  styles.warningTitle,
-                  isCompact && styles.warningTitleCompact,
-                ]}
-                accessibilityRole="header"
-              >
-                Din hjälp behövs i närområdet
-              </Text>
-
-              <View style={styles.accentLine} />
-
-              <View style={styles.notice}>
-                <View style={styles.noticeHeading}>
-                  {isPending ? (
-                    <Clock
-                      size={21}
-                      color={colors.primary}
-                      strokeWidth={1.8}
-                    />
-                  ) : (
-                    <FileText
-                      size={21}
-                      color={colors.primary}
-                      strokeWidth={1.8}
-                    />
-                  )}
-
-                  <Text style={styles.noticeTitle}>
-                    {isPending
-                      ? "Ditt intyg granskas"
-                      : needsChanges
-                        ? "Komplettera ditt intyg"
-                        : "Ett steg återstår"}
-                  </Text>
-                </View>
-
-                <Text style={styles.noticeText}>
-                  {isPending
-                    ? "Du kan börja hjälpa när intyget har godkänts. Granskningen tar normalt upp till en vecka."
-                    : needsChanges
-                      ? "Se vad du behöver komplettera innan ditt intyg kan godkännas."
-                      : "Ett godkänt utbildningsintyg krävs för att börja hjälpa. Gå utbildningen eller ladda upp ett intyg du redan har."}
-                </Text>
-
-                {needsChanges && certificate?.review_note && (
-                  <View style={styles.reviewNote}>
-                    <Text style={styles.reviewLabel}>
-                      Från granskningen
-                    </Text>
-
-                    <Text style={styles.reviewText}>
-                      {certificate.review_note}
-                    </Text>
-                  </View>
-                )}
-              </View>
-
-              {message !== "" && (
-                <Text
-                  style={styles.message}
-                  accessibilityLiveRegion="polite"
-                >
-                  {message}
-                </Text>
-              )}
-            </View>
-          </ScrollView>
-
-          <View style={styles.bottom}>
-            <PrimaryButton
-              title={
-                isLoading
-                  ? "Hämtar..."
-                  : isPending
-                    ? "Uppdatera status"
-                    : needsChanges
-                      ? "Visa mitt intyg"
-                      : "Ladda upp intyg"
-              }
-              disabled={isLoading}
-              onPress={
-                isPending || message !== ""
-                  ? refreshStatus
-                  : openTraining
-              }
-            />
-
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setWarningVisible(false)}
-              style={({ pressed }) => [
-                styles.textButton,
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={styles.textButtonText}>
-                Tillbaka till certifieringen
-              </Text>
-            </Pressable>
-          </View>
-        </SafeAreaView>
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -461,34 +271,21 @@ type RequirementProps = {
   completed: boolean;
 };
 
-function Requirement({
-  title,
-  description,
-  completed,
-}: RequirementProps) {
+function Requirement({ title, description, completed }: RequirementProps) {
   return (
     <View style={styles.requirementRow}>
       <View
-        style={[
-          styles.checkCircle,
-          completed && styles.checkCircleCompleted,
-        ]}
+        style={[styles.checkCircle, completed && styles.checkCircleCompleted]}
       >
         {completed && (
-          <Check
-            size={17}
-            color={colors.primary}
-            strokeWidth={2.8}
-          />
+          <Check size={17} color={colors.primary} strokeWidth={2.8} />
         )}
       </View>
 
       <View style={styles.requirementText}>
         <Text style={styles.requirementTitle}>{title}</Text>
 
-        <Text style={styles.requirementDescription}>
-          {description}
-        </Text>
+        <Text style={styles.requirementDescription}>{description}</Text>
       </View>
     </View>
   );
@@ -531,7 +328,7 @@ const styles = StyleSheet.create({
     borderRadius: 56,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#DCEAF3",
+    backgroundColor: colors.primaryBackground,
     marginBottom: 22,
   },
 
@@ -592,8 +389,8 @@ const styles = StyleSheet.create({
   },
 
   checkCircleCompleted: {
-    borderColor: "#DCEAF3",
-    backgroundColor: "#DCEAF3",
+    borderColor: colors.primaryBackground,
+    backgroundColor: colors.primaryBackground,
   },
 
   requirementText: {
@@ -618,103 +415,6 @@ const styles = StyleSheet.create({
     height: 1,
     marginVertical: 14,
     backgroundColor: colors.border,
-  },
-
-  warningContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 28,
-    paddingVertical: 32,
-  },
-
-  warningMain: {
-    width: "100%",
-    maxWidth: 380,
-  },
-
-  eyebrow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 20,
-  },
-
-  eyebrowText: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: "600",
-    color: colors.primary,
-  },
-
-  warningTitle: {
-    fontSize: 38,
-    lineHeight: 46,
-    fontWeight: "700",
-    letterSpacing: -0.8,
-    color: colors.text,
-  },
-
-  warningTitleCompact: {
-    fontSize: 32,
-    lineHeight: 40,
-  },
-
-  accentLine: {
-    width: 48,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.primary,
-    marginTop: 24,
-    marginBottom: 28,
-  },
-
-  notice: {
-    padding: 20,
-    borderRadius: 18,
-    backgroundColor: colors.surface,
-  },
-
-  noticeHeading: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-
-  noticeTitle: {
-    flex: 1,
-    fontSize: 16,
-    lineHeight: 23,
-    fontWeight: "600",
-    color: colors.text,
-  },
-
-  noticeText: {
-    marginTop: 10,
-    fontSize: 15,
-    lineHeight: 24,
-    color: colors.textSecondary,
-  },
-
-  reviewNote: {
-    marginTop: 16,
-    paddingTop: 14,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-
-  reviewLabel: {
-    fontSize: 12,
-    lineHeight: 18,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
-
-  reviewText: {
-    marginTop: 5,
-    fontSize: 14,
-    lineHeight: 22,
-    color: colors.text,
   },
 
   message: {

@@ -1,13 +1,9 @@
-import { LucideIcon } from "lucide-react-native";
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TextInputProps,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 
 import { colors } from "@/constants/colors";
+
+import type { LucideIcon } from "lucide-react-native";
+import type { TextInputProps } from "react-native";
 
 type FormInputProps = TextInputProps & {
   label: string;
@@ -24,11 +20,11 @@ export default function FormInput({
       <Text style={styles.label}>{label}</Text>
 
       <View style={styles.inputContainer}>
-        {Icon && <Icon size={21} color= {colors.textSecondary} />}
+        {Icon && <Icon size={21} color={colors.textSecondary} />}
 
         <TextInput
           style={styles.input}
-          placeholderTextColor= {colors.placeholder}
+          placeholderTextColor={colors.placeholder}
           {...textInputProps}
         />
       </View>

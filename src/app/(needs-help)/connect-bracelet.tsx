@@ -1,12 +1,7 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { Wifi } from "lucide-react-native";
 import { useRef, useState } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import PrimaryButton from "@/components/ui/PrimaryButton";
@@ -31,7 +26,7 @@ export default function ConnectBraceletScreen() {
 
     if (!params.recipientId) {
       setMessage(
-        "Kunde inte hitta registreringen. Gå tillbaka till Om dig och fortsätt därifrån."
+        "Kunde inte hitta registreringen. Gå tillbaka till Om dig och fortsätt därifrån.",
       );
       return;
     }
@@ -72,9 +67,7 @@ export default function ConnectBraceletScreen() {
       console.error("Slutföra registrering:", error);
 
       const details =
-        typeof error === "object" &&
-          error !== null &&
-          "message" in error
+        typeof error === "object" && error !== null && "message" in error
           ? String(error.message)
           : "Okänt fel";
 
@@ -130,17 +123,11 @@ export default function ConnectBraceletScreen() {
             </View>
 
             <View style={styles.wifiBadge}>
-              <Wifi
-                size={24}
-                color={colors.primary}
-                strokeWidth={2}
-              />
+              <Wifi size={24} color={colors.primary} strokeWidth={2} />
             </View>
           </View>
 
-          <Text style={styles.braceletTitle}>
-            Ditt armband
-          </Text>
+          <Text style={styles.braceletTitle}>Ditt armband</Text>
 
           <Text style={styles.braceletDescription}>
             Här kommer du att kunna koppla ditt armband.
@@ -150,10 +137,7 @@ export default function ConnectBraceletScreen() {
 
       <View style={styles.bottom}>
         {message !== "" && (
-          <Text
-            style={styles.message}
-            accessibilityLiveRegion="polite"
-          >
+          <Text style={styles.message} accessibilityLiveRegion="polite">
             {message}
           </Text>
         )}
@@ -264,7 +248,7 @@ const styles = StyleSheet.create({
     width: 53,
     height: 53,
     borderRadius: 27,
-    backgroundColor: "#E8F0F5",
+    backgroundColor: colors.surfaceSecondary,
     borderWidth: 4,
     borderColor: "#C2D6E4",
     alignItems: "center",

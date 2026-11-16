@@ -20,22 +20,9 @@ import PhoneInput from "@/components/ui/PhoneInput";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { colors } from "@/constants/colors";
+import { relations } from "@/constants/relations";
 import { supabase } from "@/lib/supabase";
-import {
-  capitalizeFirstLetter,
-  formatPhoneNumber,
-} from "@/utils/formatters";
-
-const relations = [
-  "Partner",
-  "Förälder",
-  "Barn",
-  "Syskon",
-  "Annan släkting",
-  "Vän",
-  "Granne",
-  "Annat",
-];
+import { capitalizeFirstLetter, formatPhoneNumber } from "@/utils/formatters";
 
 export default function EmergencyContactScreen() {
   const params = useLocalSearchParams<{
@@ -49,9 +36,7 @@ export default function EmergencyContactScreen() {
   const person = isOtherPerson ? "other" : "self";
 
   const verification =
-    params.verification === "demo-verified"
-      ? "demo-verified"
-      : "pending";
+    params.verification === "demo-verified" ? "demo-verified" : "pending";
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -85,9 +70,7 @@ export default function EmergencyContactScreen() {
 
         const { data, error } = await supabase
           .from("emergency_contacts")
-          .select(
-            "first_name, last_name, relation, other_relation, phone"
-          )
+          .select("first_name, last_name, relation, other_relation, phone")
           .eq("recipient_id", recipientId)
           .maybeSingle();
 
@@ -106,7 +89,7 @@ export default function EmergencyContactScreen() {
         setMessage(
           recipientId
             ? "Kunde inte hämta nödkontakten. Kontrollera anslutningen och försök igen."
-            : "Personkopplingen saknas. Gå tillbaka till Om dig och tryck på Fortsätt."
+            : "Personkopplingen saknas. Gå tillbaka till Om dig och tryck på Fortsätt.",
         );
       } finally {
         if (isMounted) {
@@ -140,7 +123,7 @@ export default function EmergencyContactScreen() {
 
     if (!recipientId) {
       setMessage(
-        "Personkopplingen saknas. Gå tillbaka till Om dig och tryck på Fortsätt."
+        "Personkopplingen saknas. Gå tillbaka till Om dig och tryck på Fortsätt.",
       );
       return;
     }
@@ -157,18 +140,17 @@ export default function EmergencyContactScreen() {
             first_name: firstName.trim(),
             last_name: lastName.trim(),
             relation,
-            other_relation:
-              relation === "Annat" ? otherRelation.trim() : "",
+            other_relation: relation === "Annat" ? otherRelation.trim() : "",
             phone: phone.replace(/\D/g, ""),
           },
-          { onConflict: "recipient_id" }
+          { onConflict: "recipient_id" },
         )
         .select("recipient_id")
         .single();
 
       if (error) {
         setMessage(
-          "Kunde inte spara nödkontakten. Kontrollera anslutningen och försök igen."
+          "Kunde inte spara nödkontakten. Kontrollera anslutningen och försök igen.",
         );
         return;
       }
@@ -183,7 +165,7 @@ export default function EmergencyContactScreen() {
       });
     } catch {
       setMessage(
-        "Kunde inte ansluta. Kontrollera din internetanslutning och försök igen."
+        "Kunde inte ansluta. Kontrollera din internetanslutning och försök igen.",
       );
     } finally {
       saving.current = false;
@@ -218,14 +200,10 @@ export default function EmergencyContactScreen() {
           {isLoading ? (
             <View style={styles.loading}>
               <ActivityIndicator color={colors.primary} />
-              <Text style={styles.loadingText}>
-                Hämtar nödkontakt...
-              </Text>
+              <Text style={styles.loadingText}>Hämtar nödkontakt...</Text>
             </View>
           ) : (
-            <View
-              pointerEvents={isSaving || loadFailed ? "none" : "auto"}
-            >
+            <View pointerEvents={isSaving || loadFailed ? "none" : "auto"}>
               <NameFields
                 firstName={firstName}
                 lastName={lastName}
@@ -297,26 +275,21 @@ export default function EmergencyContactScreen() {
                           }}
                           style={({ pressed }) => [
                             styles.dropdownOption,
-                            relation === item &&
-                              styles.dropdownSelected,
+                            relation === item && styles.dropdownSelected,
                             pressed && styles.dropdownPressed,
                           ]}
                         >
                           <Text
                             style={[
                               styles.dropdownText,
-                              relation === item &&
-                                styles.dropdownSelectedText,
+                              relation === item && styles.dropdownSelectedText,
                             ]}
                           >
                             {item}
                           </Text>
 
                           {relation === item && (
-                            <Check
-                              size={20}
-                              color={colors.primary}
-                            />
+                            <Check size={20} color={colors.primary} />
                           )}
                         </Pressable>
                       ))}
@@ -354,10 +327,7 @@ export default function EmergencyContactScreen() {
           )}
 
           {message !== "" && (
-            <Text
-              style={styles.message}
-              accessibilityLiveRegion="polite"
-            >
+            <Text style={styles.message} accessibilityLiveRegion="polite">
               {message}
             </Text>
           )}

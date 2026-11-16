@@ -1,0 +1,10 @@
+node_modules/
+.expo/
+dist/
+web-build/
+output/
+package-lock*.json
+assets/
+android/
+ios/
+docs/design/

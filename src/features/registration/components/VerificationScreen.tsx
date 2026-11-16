@@ -39,8 +39,7 @@ export default function VerificationScreen({
   const [state, setState] = useState<VerificationState>("idle");
   const [privacyVisible, setPrivacyVisible] = useState(false);
 
-  const verificationTimer =
-    useRef<ReturnType<typeof setTimeout> | null>(null);
+  const verificationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
@@ -97,28 +96,14 @@ export default function VerificationScreen({
           )}
         </View>
 
-        <View
-          style={styles.verification}
-          accessibilityLiveRegion="polite"
-        >
+        <View style={styles.verification} accessibilityLiveRegion="polite">
           <View
-            style={[
-              styles.iconCircle,
-              isVerified && styles.iconCircleVerified,
-            ]}
+            style={[styles.iconCircle, isVerified && styles.iconCircleVerified]}
           >
             {isVerified ? (
-              <Check
-                size={64}
-                color={colors.success}
-                strokeWidth={2.5}
-              />
+              <Check size={64} color={colors.success} strokeWidth={2.5} />
             ) : (
-              <ShieldCheck
-                size={72}
-                color={colors.primary}
-                strokeWidth={1.6}
-              />
+              <ShieldCheck size={72} color={colors.primary} strokeWidth={1.6} />
             )}
           </View>
 
@@ -140,15 +125,12 @@ export default function VerificationScreen({
 
       <View style={styles.bottom}>
         <View style={styles.privacyCard}>
-          <Info
-            size={18}
-            color={colors.primary}
-            style={styles.infoIcon}
-          />
+          <Info size={18} color={colors.primary} style={styles.infoIcon} />
 
           <View style={styles.privacyContent}>
             <Text style={styles.privacyText}>
-              Vi behöver dina personuppgifter för att kunna verifiera din identitet och skapa din profil.
+              Vi behöver dina personuppgifter för att kunna verifiera din
+              identitet och skapa din profil.
             </Text>
 
             <Pressable
@@ -168,10 +150,7 @@ export default function VerificationScreen({
         </View>
 
         {isVerified ? (
-          <PrimaryButton
-            title="Fortsätt"
-            onPress={handleContinue}
-          />
+          <PrimaryButton title="Fortsätt" onPress={handleContinue} />
         ) : (
           <Pressable
             accessibilityRole="button"
@@ -190,9 +169,7 @@ export default function VerificationScreen({
               isVerifying && styles.disabled,
             ]}
           >
-            {isVerifying && (
-              <ActivityIndicator color={colors.surface} />
-            )}
+            {isVerifying && <ActivityIndicator color={colors.surface} />}
 
             <Text style={styles.verifyButtonText}>
               {isVerifying ? "Väntar på BankID..." : "Öppna BankID"}
@@ -212,9 +189,7 @@ export default function VerificationScreen({
               isVerifying && styles.disabled,
             ]}
           >
-            <Text style={styles.manualButtonText}>
-              Fortsätt utan BankID
-            </Text>
+            <Text style={styles.manualButtonText}>Fortsätt utan BankID</Text>
           </Pressable>
         )}
       </View>
@@ -226,15 +201,9 @@ export default function VerificationScreen({
         onRequestClose={() => setPrivacyVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View
-            style={styles.modalCard}
-            accessibilityViewIsModal
-          >
+          <View style={styles.modalCard} accessibilityViewIsModal>
             <View style={styles.modalHeader}>
-              <Text
-                style={styles.modalTitle}
-                accessibilityRole="header"
-              >
+              <Text style={styles.modalTitle} accessibilityRole="header">
                 Dina personuppgifter
               </Text>
 
@@ -258,18 +227,15 @@ export default function VerificationScreen({
               </Text>
 
               <Text style={styles.modalText}>
-                Uppgifterna du lämnar vid registreringen används
-                för att skapa din profil och samordna hjälp.
-                Identifieringen är till för att bekräfta din identitet.
+                Uppgifterna du lämnar vid registreringen används för att skapa
+                din profil och samordna hjälp. Identifieringen är till för att
+                bekräfta din identitet.
               </Text>
 
-              <Text style={styles.sectionTitle}>
-                Uppgifter i din profil
-              </Text>
+              <Text style={styles.sectionTitle}>Uppgifter i din profil</Text>
 
               <Text style={styles.modalText}>
-                Registreringen omfattar namn, kontaktuppgifter
-                och adress.
+                Registreringen omfattar namn, kontaktuppgifter och adress.
               </Text>
             </ScrollView>
 
@@ -330,7 +296,7 @@ const styles = StyleSheet.create({
     borderRadius: 70,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#DCEAF3",
+    backgroundColor: colors.primaryBackground,
     marginBottom: 28,
   },
 

@@ -1,8 +1,8 @@
-import { router, useFocusEffect } from "expo-router";
+import { decode } from "base64-arraybuffer";
 import * as Crypto from "expo-crypto";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
-import { decode } from "base64-arraybuffer";
+import { router, useLocalSearchParams } from "expo-router";
 import {
   Check,
   Clock,
@@ -26,13 +26,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { colors } from "@/constants/colors";
+import useReloadableFocusEffect from "@/hooks/useReloadableFocusEffect";
 import { supabase } from "@/lib/supabase";
 
-type Certificate = {
-  file_name: string;
-  status: "pending" | "approved" | "needs_changes";
-  review_note: string | null;
-};
+import type { CertificateReview } from "@/types/certificate";
+
+type Certificate = CertificateReview & { file_name: string };
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -44,17 +43,23 @@ const MIME_TYPES: Record<string, string> = {
 };
 
 export default function HelperTrainingScreen() {
+  const { from } = useLocalSearchParams<{
+    from?: string;
+  }>();
+
+  const fromProfile = from === "profile";
+
   const [certificate, setCertificate] = useState<Certificate | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
   const [profileMissing, setProfileMissing] = useState(false);
   const [message, setMessage] = useState("");
-  const [loadAttempt, setLoadAttempt] = useState(0);
 
   const uploadLock = useRef(false);
 
-  useFocusEffect(
+  const reload = useReloadableFocusEffect(
     useCallback(() => {
       let active = true;
 
@@ -102,10 +107,12 @@ export default function HelperTrainingScreen() {
 
           setLoadFailed(true);
           setMessage(
-            "Kunde inte hämta ditt intyg. Kontrollera anslutningen och försök igen."
+            "Kunde inte hämta ditt intyg. Kontrollera anslutningen och försök igen.",
           );
         } finally {
-          if (active) setIsLoading(false);
+          if (active) {
+            setIsLoading(false);
+          }
         }
       };
 
@@ -114,7 +121,7 @@ export default function HelperTrainingScreen() {
       return () => {
         active = false;
       };
-    }, [loadAttempt])
+    }, []),
   );
 
   const isApproved = certificate?.status === "approved";
@@ -151,6 +158,7 @@ export default function HelperTrainingScreen() {
       }
 
       const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
+
       const mimeType = file.mimeType || MIME_TYPES[extension];
 
       if (
@@ -198,8 +206,7 @@ export default function HelperTrainingScreen() {
             ? "png"
             : "jpg";
 
-      const filePath =
-        `${authData.user.id}/${Crypto.randomUUID()}.${savedExtension}`;
+      const filePath = `${authData.user.id}/${Crypto.randomUUID()}.${savedExtension}`;
 
       const { error: uploadError } = await supabase.storage
         .from("helper-certificates")
@@ -210,7 +217,7 @@ export default function HelperTrainingScreen() {
 
       if (uploadError) {
         throw new Error(
-          "Kunde inte ladda upp filen. Kontrollera anslutningen och försök igen."
+          "Kunde inte ladda upp filen. Kontrollera anslutningen och försök igen.",
         );
       }
 
@@ -227,16 +234,14 @@ export default function HelperTrainingScreen() {
 
       if (saveError) {
         throw new Error(
-          "Filen laddades upp men intyget kunde inte sparas. Uppdatera statusen innan du försöker igen."
+          "Filen laddades upp men intyget kunde inte sparas. Uppdatera statusen innan du försöker igen.",
         );
       }
 
       setCertificate(savedCertificate as Certificate);
     } catch (error) {
       setMessage(
-        error instanceof Error
-          ? error.message
-          : "Något gick fel. Försök igen."
+        error instanceof Error ? error.message : "Något gick fel. Försök igen.",
       );
     } finally {
       uploadLock.current = false;
@@ -245,16 +250,19 @@ export default function HelperTrainingScreen() {
   };
 
   const handleContinue = () => {
-    if (
-      isLoading ||
-      uploadLock.current ||
-      loadFailed ||
-      profileMissing
-    ) {
+    if (isLoading || uploadLock.current || loadFailed || profileMissing) {
       return;
     }
 
-    router.push("/helper-permissions");
+    if (fromProfile) {
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace("/helper-profile");
+      }
+    } else {
+      router.push("/helper-permissions");
+    }
   };
 
   const certificateTitle = isApproved
@@ -266,12 +274,14 @@ export default function HelperTrainingScreen() {
   const certificateDescription = isApproved
     ? "Ditt utbildningsintyg har godkänts."
     : isPending
-      ? "Ditt intyg granskas normalt inom 1 vecka. Du kan fortsätta registreringen under tiden."
+      ? fromProfile
+        ? "Ditt intyg granskas normalt inom 1 vecka."
+        : "Ditt intyg granskas normalt inom 1 vecka. Du kan fortsätta registreringen under tiden."
       : "Se meddelandet från granskningen nedan.";
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScreenHeader step="Steg 4 av 5" />
+      <ScreenHeader step={fromProfile ? undefined : "Steg 4 av 5"} />
 
       <ScrollView
         style={styles.scrollView}
@@ -281,16 +291,16 @@ export default function HelperTrainingScreen() {
         <Text style={styles.title}>Utbildningsintyg</Text>
 
         <Text style={styles.description}>
-          Ladda upp ditt utbildningsintyg, eller komplettera senare.
+          {fromProfile
+            ? "Här ser du statusen för ditt utbildningsintyg."
+            : "Ladda upp ditt utbildningsintyg, eller komplettera senare."}
         </Text>
 
         {isLoading ? (
           <View style={styles.loadingCard}>
             <ActivityIndicator size="large" color={colors.primary} />
 
-            <Text style={styles.loadingText}>
-              Hämtar ditt intyg...
-            </Text>
+            <Text style={styles.loadingText}>Hämtar ditt intyg...</Text>
           </View>
         ) : loadFailed || profileMissing ? (
           <View style={styles.errorCard}>
@@ -310,10 +320,7 @@ export default function HelperTrainingScreen() {
         ) : certificate ? (
           <View style={styles.certificateCard}>
             <View
-              style={[
-                styles.uploadIcon,
-                isApproved && styles.approvedIcon,
-              ]}
+              style={[styles.uploadIcon, isApproved && styles.approvedIcon]}
             >
               {isApproved ? (
                 <Check size={26} color={colors.success} />
@@ -324,9 +331,7 @@ export default function HelperTrainingScreen() {
               )}
             </View>
 
-            <Text style={styles.uploadTitle}>
-              {certificateTitle}
-            </Text>
+            <Text style={styles.uploadTitle}>{certificateTitle}</Text>
 
             <Text style={styles.certificateDescription}>
               {certificateDescription}
@@ -335,9 +340,7 @@ export default function HelperTrainingScreen() {
             <View style={styles.fileRow}>
               <FileText size={21} color={colors.primary} />
 
-              <Text style={styles.fileName}>
-                {certificate.file_name}
-              </Text>
+              <Text style={styles.fileName}>{certificate.file_name}</Text>
             </View>
 
             {certificate.status === "needs_changes" &&
@@ -355,12 +358,10 @@ export default function HelperTrainingScreen() {
 
             <Pressable
               accessibilityRole="button"
-              onPress={() => setLoadAttempt((current) => current + 1)}
+              onPress={() => reload()}
               style={styles.refreshButton}
             >
-              <Text style={styles.refreshText}>
-                Uppdatera status
-              </Text>
+              <Text style={styles.refreshText}>Uppdatera status</Text>
             </Pressable>
           </View>
         ) : (
@@ -369,9 +370,7 @@ export default function HelperTrainingScreen() {
               <UploadCloud size={26} color={colors.primary} />
             </View>
 
-            <Text style={styles.uploadTitle}>
-              Ladda upp ditt intyg
-            </Text>
+            <Text style={styles.uploadTitle}>Ladda upp ditt intyg</Text>
 
             <Text style={styles.fileHint}>
               PDF, JPG eller PNG · Högst 10 MB
@@ -393,10 +392,7 @@ export default function HelperTrainingScreen() {
               ]}
             >
               {isUploading ? (
-                <ActivityIndicator
-                  size="small"
-                  color={colors.surface}
-                />
+                <ActivityIndicator size="small" color={colors.surface} />
               ) : (
                 <FileText size={18} color={colors.surface} />
               )}
@@ -408,46 +404,38 @@ export default function HelperTrainingScreen() {
           </View>
         )}
 
-        {!isLoading &&
-          !loadFailed &&
-          !profileMissing &&
-          !certificate && (
-            <View style={styles.educationCard}>
-              <View style={styles.educationIcon}>
-                <GraduationCap size={22} color="#247879" />
-              </View>
-
-              <View style={styles.educationText}>
-                <Text style={styles.educationTitle}>
-                  Har du inte gått utbildningen än?
-                </Text>
-
-                <Text style={styles.educationDescription}>
-                  Utbildningen görs online eller på plats.
-                  Ett godkänt intyg krävs för att börja hjälpa.
-                </Text>
-              </View>
+        {!isLoading && !loadFailed && !profileMissing && !certificate && (
+          <View style={styles.educationCard}>
+            <View style={styles.educationIcon}>
+              <GraduationCap size={22} color="#247879" />
             </View>
-          )}
+
+            <View style={styles.educationText}>
+              <Text style={styles.educationTitle}>
+                Har du inte gått utbildningen än?
+              </Text>
+
+              <Text style={styles.educationDescription}>
+                Utbildningen görs online eller på plats. Ett godkänt intyg krävs
+                för att börja hjälpa.
+              </Text>
+            </View>
+          </View>
+        )}
 
         {message !== "" && !loadFailed && !profileMissing && (
           <View style={styles.uploadError}>
-            <Text
-              style={styles.message}
-              accessibilityLiveRegion="polite"
-            >
+            <Text style={styles.message} accessibilityLiveRegion="polite">
               {message}
             </Text>
 
             <Pressable
               accessibilityRole="button"
               disabled={isUploading}
-              onPress={() => setLoadAttempt((current) => current + 1)}
+              onPress={() => reload()}
               style={styles.refreshButton}
             >
-              <Text style={styles.refreshText}>
-                Uppdatera status
-              </Text>
+              <Text style={styles.refreshText}>Uppdatera status</Text>
             </Pressable>
           </View>
         )}
@@ -459,21 +447,27 @@ export default function HelperTrainingScreen() {
             isLoading
               ? "Hämtar..."
               : profileMissing
-                ? "Till Om dig"
+                ? fromProfile
+                  ? "Till profil"
+                  : "Till Om dig"
                 : loadFailed
                   ? "Försök igen"
                   : isUploading
                     ? "Laddar upp..."
-                    : certificate
-                      ? "Fortsätt"
-                      : "Fortsätt utan intyg"
+                    : fromProfile
+                      ? "Klart"
+                      : certificate
+                        ? "Fortsätt"
+                        : "Fortsätt utan intyg"
           }
           disabled={isLoading || isUploading}
           onPress={() => {
             if (profileMissing) {
-              router.replace("/helper-details");
+              router.replace(
+                fromProfile ? "/helper-profile" : "/helper-details",
+              );
             } else if (loadFailed) {
-              setLoadAttempt((current) => current + 1);
+              reload();
             } else {
               handleContinue();
             }
@@ -489,31 +483,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-
   scrollView: {
     flex: 1,
   },
-
   content: {
     paddingHorizontal: 24,
     paddingTop: 20,
     paddingBottom: 12,
   },
-
   title: {
     fontSize: 28,
     lineHeight: 35,
     fontWeight: "700",
     color: colors.text,
   },
-
   description: {
     marginTop: 8,
     fontSize: 14,
     lineHeight: 21,
     color: colors.textSecondary,
   },
-
   uploadCard: {
     marginTop: 20,
     paddingHorizontal: 20,
@@ -525,7 +514,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     alignItems: "center",
   },
-
   uploadIcon: {
     width: 46,
     height: 46,
@@ -535,7 +523,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 12,
   },
-
   uploadTitle: {
     fontSize: 18,
     lineHeight: 25,
@@ -543,7 +530,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: colors.text,
   },
-
   fileHint: {
     marginTop: 5,
     fontSize: 13,
@@ -551,7 +537,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: colors.textSecondary,
   },
-
   chooseButton: {
     alignSelf: "stretch",
     minHeight: 46,
@@ -565,13 +550,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 9,
   },
-
   chooseButtonText: {
     fontSize: 16,
     fontWeight: "700",
     color: colors.surface,
   },
-
   educationCard: {
     marginTop: 16,
     padding: 16,
@@ -581,7 +564,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 12,
   },
-
   educationIcon: {
     width: 40,
     height: 40,
@@ -590,25 +572,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
   educationText: {
     flex: 1,
   },
-
   educationTitle: {
     fontSize: 14,
     lineHeight: 20,
     fontWeight: "700",
     color: colors.text,
   },
-
   educationDescription: {
     marginTop: 5,
     fontSize: 13,
     lineHeight: 20,
     color: colors.textSecondary,
   },
-
   certificateCard: {
     marginTop: 20,
     padding: 20,
@@ -618,7 +596,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     alignItems: "center",
   },
-
   certificateDescription: {
     marginTop: 8,
     fontSize: 14,
@@ -626,7 +603,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: colors.textSecondary,
   },
-
   fileRow: {
     alignSelf: "stretch",
     marginTop: 16,
@@ -637,7 +613,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
-
   fileName: {
     flex: 1,
     fontSize: 14,
@@ -645,33 +620,27 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontWeight: "500",
   },
-
   statusBadge: {
     marginTop: 14,
     paddingHorizontal: 13,
     paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: "#DCEAF3",
+    backgroundColor: colors.primaryBackground,
   },
-
   statusText: {
     fontSize: 13,
     fontWeight: "600",
     color: colors.primary,
   },
-
   approvedIcon: {
     backgroundColor: colors.successBackground,
   },
-
   approvedBadge: {
     backgroundColor: colors.successBackground,
   },
-
   approvedText: {
     color: colors.success,
   },
-
   reviewNote: {
     alignSelf: "stretch",
     marginTop: 16,
@@ -679,20 +648,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: "#F7FAFC",
   },
-
   reviewTitle: {
     fontSize: 13,
     fontWeight: "600",
     color: colors.text,
   },
-
   reviewText: {
     marginTop: 6,
     fontSize: 14,
     lineHeight: 21,
     color: colors.textSecondary,
   },
-
   refreshButton: {
     minHeight: 44,
     paddingHorizontal: 12,
@@ -701,13 +667,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
   refreshText: {
     fontSize: 14,
     fontWeight: "600",
     color: colors.primary,
   },
-
   loadingCard: {
     marginTop: 20,
     padding: 28,
@@ -715,13 +679,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     alignItems: "center",
   },
-
   loadingText: {
     marginTop: 14,
     fontSize: 15,
     color: colors.textSecondary,
   },
-
   errorCard: {
     marginTop: 20,
     padding: 20,
@@ -729,7 +691,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     alignItems: "center",
   },
-
   errorTitle: {
     marginTop: 12,
     fontSize: 18,
@@ -738,7 +699,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: colors.text,
   },
-
   errorDescription: {
     marginTop: 10,
     fontSize: 14,
@@ -746,32 +706,27 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: colors.error,
   },
-
   uploadError: {
     marginTop: 16,
     padding: 14,
     borderRadius: 14,
     backgroundColor: colors.surface,
   },
-
   message: {
     fontSize: 14,
     lineHeight: 21,
     textAlign: "center",
     color: colors.error,
   },
-
   bottom: {
     paddingHorizontal: 24,
     paddingTop: 12,
     paddingBottom: 14,
     backgroundColor: colors.background,
   },
-
   pressed: {
     opacity: 0.8,
   },
-
   disabled: {
     opacity: 0.6,
   },

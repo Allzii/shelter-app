@@ -23,7 +23,6 @@ export default function StartScreen() {
       </View>
 
       <SafeAreaView style={styles.safeArea}>
-
         <Pressable
           onPress={handleAbout}
           accessibilityRole="button"
@@ -45,7 +44,7 @@ export default function StartScreen() {
           />
 
           <Text style={styles.brand} maxFontSizeMultiplier={1.3}>
-             AppNamn
+            AppNamn
           </Text>
 
           <Text style={styles.title} maxFontSizeMultiplier={1.3}>
@@ -58,10 +57,7 @@ export default function StartScreen() {
         </View>
 
         <View style={styles.bottom}>
-          <PrimaryButton
-            title="Kom igång"
-            onPress={handleGetStarted}
-          />
+          <PrimaryButton title="Kom igång" onPress={handleGetStarted} />
 
           <Pressable
             onPress={() => router.push("/login")}
@@ -71,7 +67,9 @@ export default function StartScreen() {
               pressed && styles.aboutPressed,
             ]}
           >
-            <Text style={styles.aboutText}>Har du redan ett konto? Logga in</Text>
+            <Text style={styles.aboutText}>
+              Har du redan ett konto? Logga in
+            </Text>
           </Pressable>
         </View>
       </SafeAreaView>

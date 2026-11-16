@@ -1,9 +1,5 @@
 import { ChevronRight } from "lucide-react-native";
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-} from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 
 import { colors } from "@/constants/colors";
 
@@ -30,11 +26,7 @@ export default function PrimaryButton({
     >
       <Text style={styles.buttonText}>{title}</Text>
 
-      <ChevronRight
-        size={22}
-        color={colors.surface}
-        style={styles.arrow}
-      />
+      <ChevronRight size={22} color={colors.surface} style={styles.arrow} />
     </Pressable>
   );
 }

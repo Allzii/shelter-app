@@ -1,17 +1,6 @@
-import {
-  Battery,
-  Clock3,
-  Link2,
-  Vibrate,
-} from "lucide-react-native";
+import { Battery, Clock3, Link2, Vibrate } from "lucide-react-native";
 import { useRef, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import PrimaryButton from "@/components/ui/PrimaryButton";
@@ -20,11 +9,9 @@ import { colors } from "@/constants/colors";
 const BRACELET_URL = "http://192.168.50.232:8080";
 
 export default function RecipientBraceletScreen() {
-  const [isCheckingConnection, setIsCheckingConnection] =
-    useState(false);
+  const [isCheckingConnection, setIsCheckingConnection] = useState(false);
 
-  const [connectionMessage, setConnectionMessage] =
-    useState("");
+  const [connectionMessage, setConnectionMessage] = useState("");
 
   const checkingConnection = useRef(false);
 
@@ -36,10 +23,7 @@ export default function RecipientBraceletScreen() {
     setConnectionMessage("");
 
     const controller = new AbortController();
-    const timer = setTimeout(
-      () => controller.abort(),
-      10000
-    );
+    const timer = setTimeout(() => controller.abort(), 10000);
 
     try {
       const response = await fetch(BRACELET_URL, {
@@ -52,19 +36,14 @@ export default function RecipientBraceletScreen() {
 
       const message = await response.text();
 
-      if (
-        message.trim() !==
-        "Kontakt med armbandet fungerar!"
-      ) {
+      if (message.trim() !== "Kontakt med armbandet fungerar!") {
         throw new Error("Oväntat svar");
       }
 
-      setConnectionMessage(
-        "Kontakt med armbandet fungerar."
-      );
+      setConnectionMessage("Kontakt med armbandet fungerar.");
     } catch {
       setConnectionMessage(
-        "Kunde inte nå armbandet. Kontrollera anslutningen och försök igen."
+        "Kunde inte nå armbandet. Kontrollera anslutningen och försök igen.",
       );
     } finally {
       clearTimeout(timer);
@@ -74,10 +53,7 @@ export default function RecipientBraceletScreen() {
   };
 
   return (
-    <SafeAreaView
-      style={styles.container}
-      edges={["top", "left", "right"]}
-    >
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
@@ -87,16 +63,12 @@ export default function RecipientBraceletScreen() {
         <View style={styles.braceletCard}>
           <BraceletIllustration />
 
-          <Text style={styles.braceletName}>
-            Ditt hjälparmband
-          </Text>
+          <Text style={styles.braceletName}>Ditt hjälparmband</Text>
 
           <View style={styles.statusBadge}>
             <View style={styles.statusDot} />
 
-            <Text style={styles.statusText}>
-              Inget armband kopplat
-            </Text>
+            <Text style={styles.statusText}>Inget armband kopplat</Text>
           </View>
 
           <View style={styles.connectButton}>
@@ -123,15 +95,9 @@ export default function RecipientBraceletScreen() {
 
         <View style={styles.statusGrid}>
           <View style={styles.statusCard}>
-            <Battery
-              size={23}
-              color={colors.primary}
-              strokeWidth={1.7}
-            />
+            <Battery size={23} color={colors.primary} strokeWidth={1.7} />
 
-            <Text style={styles.statusLabel}>
-              Batteri
-            </Text>
+            <Text style={styles.statusLabel}>Batteri</Text>
 
             <Text style={styles.statusValue}>—</Text>
 
@@ -141,15 +107,9 @@ export default function RecipientBraceletScreen() {
           </View>
 
           <View style={styles.statusCard}>
-            <Clock3
-              size={23}
-              color={colors.primary}
-              strokeWidth={1.7}
-            />
+            <Clock3 size={23} color={colors.primary} strokeWidth={1.7} />
 
-            <Text style={styles.statusLabel}>
-              Senaste kontakt
-            </Text>
+            <Text style={styles.statusLabel}>Senaste kontakt</Text>
 
             <Text style={styles.statusValue}>—</Text>
 
@@ -159,9 +119,7 @@ export default function RecipientBraceletScreen() {
           </View>
         </View>
 
-        <Text style={styles.sectionTitle}>
-          Så ber du om hjälp
-        </Text>
+        <Text style={styles.sectionTitle}>Så ber du om hjälp</Text>
 
         <View style={styles.instructionsCard}>
           <Instruction
@@ -169,10 +127,7 @@ export default function RecipientBraceletScreen() {
             text="Tryck och håll in knappen på armbandet när du behöver hjälp."
           />
 
-          <Instruction
-            number="2"
-            text="Armbandet skickar en hjälpförfrågan."
-          />
+          <Instruction number="2" text="Armbandet skickar en hjälpförfrågan." />
 
           <Instruction
             number="3"
@@ -182,9 +137,8 @@ export default function RecipientBraceletScreen() {
         </View>
 
         <Text style={styles.prototypeNote}>
-          Instruktionen visar det planerade flödet.
-          Armbandet kan ännu inte skicka hjälpförfrågningar
-          via appen.
+          Instruktionen visar det planerade flödet. Armbandet kan ännu inte
+          skicka hjälpförfrågningar via appen.
         </Text>
 
         <Pressable
@@ -193,20 +147,13 @@ export default function RecipientBraceletScreen() {
           disabled
           style={styles.testButton}
         >
-          <Vibrate
-            size={21}
-            color={colors.textSecondary}
-            strokeWidth={1.8}
-          />
+          <Vibrate size={21} color={colors.textSecondary} strokeWidth={1.8} />
 
-          <Text style={styles.testButtonText}>
-            Testa armbandet
-          </Text>
+          <Text style={styles.testButtonText}>Testa armbandet</Text>
         </Pressable>
 
         <Text style={styles.testDescription}>
-          Tillgängligt när armbandet kan anslutas och
-          testläget är klart.
+          Tillgängligt när armbandet kan anslutas och testläget är klart.
         </Text>
       </ScrollView>
     </SafeAreaView>
@@ -247,11 +194,7 @@ function BraceletIllustration() {
       </View>
 
       <View style={styles.connectionBadge}>
-        <Link2
-          size={21}
-          color={colors.primary}
-          strokeWidth={1.8}
-        />
+        <Link2 size={21} color={colors.primary} strokeWidth={1.8} />
       </View>
     </View>
   );
@@ -263,27 +206,14 @@ type InstructionProps = {
   last?: boolean;
 };
 
-function Instruction({
-  number,
-  text,
-  last = false,
-}: InstructionProps) {
+function Instruction({ number, text, last = false }: InstructionProps) {
   return (
-    <View
-      style={[
-        styles.instruction,
-        !last && styles.instructionSpacing,
-      ]}
-    >
+    <View style={[styles.instruction, !last && styles.instructionSpacing]}>
       <View style={styles.numberCircle}>
-        <Text style={styles.numberText}>
-          {number}
-        </Text>
+        <Text style={styles.numberText}>{number}</Text>
       </View>
 
-      <Text style={styles.instructionText}>
-        {text}
-      </Text>
+      <Text style={styles.instructionText}>{text}</Text>
     </View>
   );
 }
@@ -379,7 +309,7 @@ const styles = StyleSheet.create({
     borderRadius: 23,
     borderWidth: 4,
     borderColor: "#C2D6E4",
-    backgroundColor: "#E8F0F5",
+    backgroundColor: colors.surfaceSecondary,
     alignItems: "center",
     justifyContent: "center",
   },

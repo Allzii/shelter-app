@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 
-import VerificationScreen from "@/components/ui/VerificationScreen";
+import VerificationScreen from "@/features/registration/components/VerificationScreen";
 
 export default function HelperVerificationScreen() {
   return (

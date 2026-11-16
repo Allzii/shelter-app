@@ -1,4 +1,5 @@
 import * as Location from "expo-location";
+import { AndroidImportance, IosAuthorizationStatus } from "expo-notifications";
 import * as Notifications from "expo-notifications";
 import {
   Bell,
@@ -45,19 +46,18 @@ type PermissionsScreenProps = {
 };
 
 function notificationsAllowed(
-  permission: Notifications.NotificationPermissionsStatus
+  permission: Notifications.NotificationPermissionsStatus,
 ) {
   return (
     permission.granted ||
-    permission.ios?.status ===
-      Notifications.IosAuthorizationStatus.PROVISIONAL
+    permission.ios?.status === IosAuthorizationStatus.PROVISIONAL
   );
 }
 
 function permissionState(
   granted: boolean,
   status: string,
-  canAskAgain: boolean
+  canAskAgain: boolean,
 ): PermissionState {
   if (granted) return "granted";
   if (!canAskAgain) return "blocked";
@@ -101,31 +101,27 @@ export default function PermissionsScreen({
     const loadPermissions = async () => {
       const check = ++latestCheck;
 
-      const [locationResult, notificationResult] =
-        await Promise.allSettled([
-          showLocation
-            ? Location.getForegroundPermissionsAsync()
-            : Promise.resolve(null),
-          Platform.OS === "web"
-            ? Promise.resolve(null)
-            : Notifications.getPermissionsAsync(),
-        ]);
+      const [locationResult, notificationResult] = await Promise.allSettled([
+        showLocation
+          ? Location.getForegroundPermissionsAsync()
+          : Promise.resolve(null),
+        Platform.OS === "web"
+          ? Promise.resolve(null)
+          : Notifications.getPermissionsAsync(),
+      ]);
 
       if (!active || check !== latestCheck) return;
 
       if (showLocation && !requestingLocation.current) {
-        if (
-          locationResult.status === "fulfilled" &&
-          locationResult.value
-        ) {
+        if (locationResult.status === "fulfilled" && locationResult.value) {
           const permission = locationResult.value;
 
           setLocationState(
             permissionState(
               permission.granted,
               permission.status,
-              permission.canAskAgain
-            )
+              permission.canAskAgain,
+            ),
           );
         } else {
           setLocationState("error");
@@ -145,8 +141,8 @@ export default function PermissionsScreen({
             permissionState(
               notificationsAllowed(permission),
               permission.status,
-              permission.canAskAgain
-            )
+              permission.canAskAgain,
+            ),
           );
         } else {
           setNotificationState("error");
@@ -173,7 +169,7 @@ export default function PermissionsScreen({
 
     if (Platform.OS === "web") {
       setMessage(
-        "Ändra platsbehörigheten i webbläsarens inställningar för den här webbplatsen och ladda sedan om sidan."
+        "Ändra platsbehörigheten i webbläsarens inställningar för den här webbplatsen och ladda sedan om sidan.",
       );
       return;
     }
@@ -184,7 +180,7 @@ export default function PermissionsScreen({
       if (!mounted.current) return;
 
       setMessage(
-        "Kunde inte öppna inställningarna. Öppna telefonens inställningar och välj appen."
+        "Kunde inte öppna inställningarna. Öppna telefonens inställningar och välj appen.",
       );
     }
   };
@@ -208,8 +204,7 @@ export default function PermissionsScreen({
     setMessage("");
 
     try {
-      const permission =
-        await Location.requestForegroundPermissionsAsync();
+      const permission = await Location.requestForegroundPermissionsAsync();
 
       if (!mounted.current) return;
 
@@ -217,8 +212,8 @@ export default function PermissionsScreen({
         permissionState(
           permission.granted,
           permission.status,
-          permission.canAskAgain
-        )
+          permission.canAskAgain,
+        ),
       );
     } catch {
       if (!mounted.current) return;
@@ -230,10 +225,7 @@ export default function PermissionsScreen({
   };
 
   const requestNotifications = async () => {
-    if (
-      requestingNotifications.current ||
-      requestingLocation.current
-    ) {
+    if (requestingNotifications.current || requestingLocation.current) {
       return;
     }
 
@@ -252,7 +244,7 @@ export default function PermissionsScreen({
       if (Platform.OS === "android") {
         await Notifications.setNotificationChannelAsync("alerts", {
           name: "Hjälpförfrågningar",
-          importance: Notifications.AndroidImportance.MAX,
+          importance: AndroidImportance.MAX,
           vibrationPattern: [0, 250, 250, 250],
         });
       }
@@ -265,8 +257,8 @@ export default function PermissionsScreen({
         permissionState(
           notificationsAllowed(permission),
           permission.status,
-          permission.canAskAgain
-        )
+          permission.canAskAgain,
+        ),
       );
     } catch {
       if (!mounted.current) return;
@@ -278,14 +270,10 @@ export default function PermissionsScreen({
   };
 
   const isRequesting =
-    locationState === "requesting" ||
-    notificationState === "requesting";
+    locationState === "requesting" || notificationState === "requesting";
 
   const handleContinue = () => {
-    if (
-      requestingLocation.current ||
-      requestingNotifications.current
-    ) {
+    if (requestingLocation.current || requestingNotifications.current) {
       return;
     }
 
@@ -342,10 +330,7 @@ export default function PermissionsScreen({
         </View>
 
         {message !== "" && (
-          <Text
-            style={styles.message}
-            accessibilityLiveRegion="polite"
-          >
+          <Text style={styles.message} accessibilityLiveRegion="polite">
             {message}
           </Text>
         )}
@@ -408,12 +393,7 @@ function PermissionCard({
   return (
     <View style={[styles.card, isGranted && styles.cardGranted]}>
       <View style={styles.cardHeader}>
-        <View
-          style={[
-            styles.cardIcon,
-            isGranted && styles.cardIconGranted,
-          ]}
-        >
+        <View style={[styles.cardIcon, isGranted && styles.cardIconGranted]}>
           <Icon
             size={23}
             color={isGranted ? colors.success : colors.primary}
@@ -429,11 +409,7 @@ function PermissionCard({
       <View accessibilityLiveRegion="polite">
         {isGranted ? (
           <View style={styles.grantedRow}>
-            <Check
-              size={19}
-              color={colors.success}
-              strokeWidth={2.5}
-            />
+            <Check size={19} color={colors.success} strokeWidth={2.5} />
 
             <Text style={styles.grantedText}>Tillåtet</Text>
           </View>
@@ -444,9 +420,7 @@ function PermissionCard({
         ) : (
           <>
             {statusMessage !== "" && (
-              <Text style={styles.statusMessage}>
-                {statusMessage}
-              </Text>
+              <Text style={styles.statusMessage}>{statusMessage}</Text>
             )}
 
             <Pressable
@@ -467,10 +441,7 @@ function PermissionCard({
               ]}
             >
               {isBusy && (
-                <ActivityIndicator
-                  size="small"
-                  color={colors.primary}
-                />
+                <ActivityIndicator size="small" color={colors.primary} />
               )}
 
               <Text style={styles.permissionButtonText}>
