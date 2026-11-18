@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { colors } from "@/constants/colors";
+import BraceletWifiSetup from "@/features/bracelet/components/BraceletWifiSetup";
 import { supabase } from "@/lib/supabase";
 
 export default function ConnectBraceletScreen() {
@@ -72,6 +73,9 @@ export default function ConnectBraceletScreen() {
           : "Okänt fel";
 
       setMessage(`Kunde inte slutföra registreringen: ${details}`);
+    } finally {
+      saving.current = false;
+      setIsSaving(false);
     }
   };
 
@@ -130,9 +134,10 @@ export default function ConnectBraceletScreen() {
           <Text style={styles.braceletTitle}>Ditt armband</Text>
 
           <Text style={styles.braceletDescription}>
-            Här kommer du att kunna koppla ditt armband.
+            Ställ in Wi-Fi nu eller fortsätt och gör det senare under Armband.
           </Text>
         </View>
+        <BraceletWifiSetup recipientId={params.recipientId} />
       </ScrollView>
 
       <View style={styles.bottom}>

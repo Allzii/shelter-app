@@ -11,7 +11,7 @@ export default function StartScreen() {
   };
 
   const handleAbout = () => {
-    // TODO: Add information about TryggNära.
+    // TODO: Add information about AppNamn.
   };
 
   return (
@@ -26,7 +26,7 @@ export default function StartScreen() {
         <Pressable
           onPress={handleAbout}
           accessibilityRole="button"
-          accessibilityLabel="Så fungerar TryggNära"
+          accessibilityLabel="Så fungerar AppNamn"
           style={({ pressed }) => [
             styles.aboutButton,
             pressed && styles.aboutPressed,
@@ -39,7 +39,7 @@ export default function StartScreen() {
 
         <View style={styles.main}>
           <Image
-            source={require("../../assets/images/tryggnara.png")}
+            source={require("../../assets/images/app-icon.png")}
             style={styles.logo}
           />
 

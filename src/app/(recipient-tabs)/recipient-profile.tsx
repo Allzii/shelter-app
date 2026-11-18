@@ -1229,13 +1229,6 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
 
-  closeButton: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
   formMessage: {
     marginTop: 12,
     fontSize: 14,
@@ -1261,11 +1254,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
     color: colors.textSecondary,
-  },
-
-  detailsContainer: {
-    flex: 1,
-    backgroundColor: colors.background,
   },
 
   contactRelationWrapper: {

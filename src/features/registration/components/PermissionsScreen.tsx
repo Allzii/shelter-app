@@ -482,13 +482,6 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
 
-  description: {
-    marginTop: 9,
-    fontSize: 15,
-    lineHeight: 23,
-    color: colors.textSecondary,
-  },
-
   cards: {
     marginTop: 24,
     gap: 16,

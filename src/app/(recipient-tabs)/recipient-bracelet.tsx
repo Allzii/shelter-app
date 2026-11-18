@@ -1,57 +1,13 @@
+import { useLocalSearchParams } from "expo-router";
 import { Battery, Clock3, Link2, Vibrate } from "lucide-react-native";
-import { useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import PrimaryButton from "@/components/ui/PrimaryButton";
 import { colors } from "@/constants/colors";
-
-const BRACELET_URL = "http://192.168.50.232:8080";
+import BraceletWifiSetup from "@/features/bracelet/components/BraceletWifiSetup";
 
 export default function RecipientBraceletScreen() {
-  const [isCheckingConnection, setIsCheckingConnection] = useState(false);
-
-  const [connectionMessage, setConnectionMessage] = useState("");
-
-  const checkingConnection = useRef(false);
-
-  const testConnection = async () => {
-    if (checkingConnection.current) return;
-
-    checkingConnection.current = true;
-    setIsCheckingConnection(true);
-    setConnectionMessage("");
-
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 10000);
-
-    try {
-      const response = await fetch(BRACELET_URL, {
-        signal: controller.signal,
-      });
-
-      if (!response.ok) {
-        throw new Error("Armbandet svarade med ett fel");
-      }
-
-      const message = await response.text();
-
-      if (message.trim() !== "Kontakt med armbandet fungerar!") {
-        throw new Error("Oväntat svar");
-      }
-
-      setConnectionMessage("Kontakt med armbandet fungerar.");
-    } catch {
-      setConnectionMessage(
-        "Kunde inte nå armbandet. Kontrollera anslutningen och försök igen.",
-      );
-    } finally {
-      clearTimeout(timer);
-      checkingConnection.current = false;
-      setIsCheckingConnection(false);
-    }
-  };
-
+  const params = useLocalSearchParams<{ recipientId?: string }>();
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <ScrollView
@@ -65,33 +21,13 @@ export default function RecipientBraceletScreen() {
 
           <Text style={styles.braceletName}>Ditt hjälparmband</Text>
 
-          <View style={styles.statusBadge}>
-            <View style={styles.statusDot} />
-
-            <Text style={styles.statusText}>Inget armband kopplat</Text>
-          </View>
-
-          <View style={styles.connectButton}>
-            <PrimaryButton
-              title={
-                isCheckingConnection
-                  ? "Kontrollerar kontakt..."
-                  : "Koppla armband"
-              }
-              disabled={isCheckingConnection}
-              onPress={() => void testConnection()}
-            />
-          </View>
-
-          {connectionMessage !== "" && (
-            <Text
-              style={styles.connectionMessage}
-              accessibilityLiveRegion="polite"
-            >
-              {connectionMessage}
-            </Text>
-          )}
+          <Text style={styles.connectionMessage}>
+            Armbandet behöver vara kopplat till rätt person och ha internet för
+            att skicka en hjälpförfrågan.
+          </Text>
         </View>
+
+        <BraceletWifiSetup recipientId={params.recipientId} />
 
         <View style={styles.statusGrid}>
           <View style={styles.statusCard}>
@@ -137,8 +73,7 @@ export default function RecipientBraceletScreen() {
         </View>
 
         <Text style={styles.prototypeNote}>
-          Instruktionen visar det planerade flödet. Armbandet kan ännu inte
-          skicka hjälpförfrågningar via appen.
+          Kontrollera kopplingen nedan och prova att förfrågan visas under Hem.
         </Text>
 
         <Pressable
@@ -369,37 +304,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     textAlign: "center",
     color: colors.text,
-  },
-
-  statusBadge: {
-    marginTop: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-    backgroundColor: "#EDF2F6",
-  },
-
-  statusDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: colors.textSecondary,
-  },
-
-  statusText: {
-    flexShrink: 1,
-    fontSize: 13,
-    lineHeight: 19,
-    fontWeight: "500",
-    color: colors.textSecondary,
-  },
-
-  connectButton: {
-    width: "100%",
-    marginTop: 22,
   },
 
   connectionMessage: {

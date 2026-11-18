@@ -42,8 +42,7 @@ example
 /ios
 /android
 
-# Local backups and generated previews
-/backups/
+# Generated deliverables and previews
 /output/
 
 # Supabase CLI cache

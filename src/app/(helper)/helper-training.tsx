@@ -620,26 +620,8 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontWeight: "500",
   },
-  statusBadge: {
-    marginTop: 14,
-    paddingHorizontal: 13,
-    paddingVertical: 7,
-    borderRadius: 20,
-    backgroundColor: colors.primaryBackground,
-  },
-  statusText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.primary,
-  },
   approvedIcon: {
     backgroundColor: colors.successBackground,
-  },
-  approvedBadge: {
-    backgroundColor: colors.successBackground,
-  },
-  approvedText: {
-    color: colors.success,
   },
   reviewNote: {
     alignSelf: "stretch",

@@ -7,4 +7,3 @@ package-lock*.json
 assets/
 android/
 ios/
-docs/design/

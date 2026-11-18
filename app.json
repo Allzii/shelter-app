@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "shelter-app",
+    "name": "AppNamn",
     "slug": "shelter-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/tryggnara.png",
+    "icon": "./assets/images/app-icon.png",
     "scheme": "shelterapp",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -15,7 +15,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/tryggnara.png"
+      "favicon": "./assets/images/app-icon.png"
     },
     "plugins": [
       "expo-router",
@@ -23,14 +23,14 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "TryggNära använder din position för att visa hjälpförfrågningar i närheten."
+          "locationWhenInUsePermission": "AppNamn använder din position för att visa hjälpförfrågningar i närheten."
         }
       ],
       [
         "expo-splash-screen",
         {
           "backgroundColor": "#208AEF",
-          "image": "./assets/images/tryggnara.png",
+          "image": "./assets/images/app-icon.png",
           "imageWidth": 76
         }
       ]

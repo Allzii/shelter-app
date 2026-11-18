@@ -15,7 +15,7 @@ const rootPattern = __dirname
   .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
   .join("[\\\\/]");
 const excludedFolders = new RegExp(
-  `^${rootPattern}[\\\\/](?:backups|dist|web-build|output|docs|tests|supabase|\\.git)(?:[\\\\/]|$)`,
+  `^${rootPattern}[\\\\/](?:dist|web-build|output|supabase|\\.git)(?:[\\\\/]|$)`,
 );
 const defaults = config.resolver.blockList;
 config.resolver.blockList = [
