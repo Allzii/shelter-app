@@ -425,7 +425,7 @@ export default function RecipientProfileScreen() {
 
       if (error) throw error;
 
-      router.replace("/");
+      // RootLayout handles SIGNED_OUT and opens the start screen directly.
     } catch {
       setMessage("Kunde inte logga ut. Försök igen.");
     } finally {

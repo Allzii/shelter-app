@@ -16,6 +16,8 @@ export default function PrimaryButton({
 }: PrimaryButtonProps) {
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
       onPress={onPress}
       disabled={disabled}
       style={({ pressed }) => [
@@ -44,7 +46,7 @@ const styles = StyleSheet.create({
   },
 
   buttonPressed: {
-    opacity: 0.82,
+    backgroundColor: "#26577E",
   },
 
   buttonDisabled: {

@@ -50,7 +50,7 @@ export default function RegistrationPersonScreen() {
       </View>
 
       <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader />
+        <ScreenHeader onBack={() => router.replace("/role")} />
 
         <ScrollView
           style={styles.scrollView}

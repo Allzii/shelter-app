@@ -8,12 +8,14 @@ type ScreenHeaderProps = {
   step?: string;
   onBack?: () => void;
   backDisabled?: boolean;
+  backLabel?: string;
 };
 
 export default function ScreenHeader({
   step,
   onBack,
   backDisabled = false,
+  backLabel = "Tillbaka",
 }: ScreenHeaderProps) {
   const navigation = useNavigation();
   const canGoBack = Boolean(onBack) || navigation.canGoBack();
@@ -43,7 +45,7 @@ export default function ScreenHeader({
         {canGoBack ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Gå tillbaka"
+            accessibilityLabel={backLabel}
             onPress={handleBack}
             disabled={backDisabled}
             accessibilityState={{ disabled: backDisabled }}
@@ -53,7 +55,7 @@ export default function ScreenHeader({
             ]}
           >
             <ChevronLeft size={24} color={colors.primary} />
-            <Text style={styles.backText}>Tillbaka</Text>
+            <Text style={styles.backText}>{backLabel}</Text>
           </Pressable>
         ) : (
           <View style={styles.backPlaceholder} />

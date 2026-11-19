@@ -3,6 +3,7 @@ import { Minus, Plus } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -120,6 +121,14 @@ export default function HelpNeedsScreen() {
       setMessage(
         "Personkopplingen saknas. Gå tillbaka till Om dig och fortsätt därifrån.",
       );
+      return;
+    }
+
+    if (selectedNeeds.length === 0) {
+      const validationMessage =
+        "Välj minst ett alternativ för det stöd som behövs.";
+      setMessage(validationMessage);
+      Alert.alert("Välj hjälpbehov", validationMessage);
       return;
     }
 

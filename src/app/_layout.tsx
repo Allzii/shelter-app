@@ -5,7 +5,7 @@ import {
   useRootNavigationState,
   useSegments,
 } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   AppState,
@@ -34,6 +34,7 @@ Notifications.setNotificationHandler({
 export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
+  const currentAccount = useRef<string | null>(null);
 
   const [navigationMessage, setNavigationMessage] = useState("");
   const [navigationAttempt, setNavigationAttempt] = useState(0);
@@ -82,6 +83,7 @@ export default function RootLayout() {
 
       if (!isMounted) return;
 
+      currentAccount.current = nextSession?.user.id ?? null;
       setSession(nextSession);
       setIsLoadingSession(false);
     });
@@ -92,7 +94,9 @@ export default function RootLayout() {
 
         if (!isMounted || receivedAuthEvent) return;
 
-        setSession(error ? null : data.session);
+        const nextSession = error ? null : data.session;
+        currentAccount.current = nextSession?.user.id ?? null;
+        setSession(nextSession);
       } catch {
         if (!isMounted || receivedAuthEvent) return;
 
@@ -137,7 +141,7 @@ export default function RootLayout() {
     if (!navigationState?.key || isLoadingSession) return;
 
     if (!accountId && isPrivateScreen) {
-      router.replace("/login");
+      router.replace("/");
     }
   }, [accountId, isLoadingSession, navigationState?.key, isPrivateScreen]);
 
@@ -170,7 +174,7 @@ export default function RootLayout() {
           .maybeSingle();
 
         if (error) throw error;
-        if (!active) return;
+        if (!active || currentAccount.current !== accountId) return;
 
         if (data) {
           router.replace({
@@ -200,7 +204,7 @@ export default function RootLayout() {
 
         if (helperProfile.error) throw helperProfile.error;
         if (helperCertificate.error) throw helperCertificate.error;
-        if (!active) return;
+        if (!active || currentAccount.current !== accountId) return;
 
         if (helperProfile.data && helperCertificate.data) {
           router.replace("/helper-home");
@@ -209,7 +213,7 @@ export default function RootLayout() {
 
         router.replace("/role");
       } catch {
-        if (!active) return;
+        if (!active || currentAccount.current !== accountId) return;
 
         setNavigationMessage(
           "Kunde inte hämta din registrering. Kontrollera anslutningen och försök igen.",

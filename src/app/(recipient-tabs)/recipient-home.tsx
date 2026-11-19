@@ -13,7 +13,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import NearbyShelterCard from "@/components/maps/NearbyShelterCard";
-import PrimaryButton from "@/components/ui/PrimaryButton";
 import { colors } from "@/constants/colors";
 import AddressDistanceNotice from "@/features/recipient/components/AddressDistanceNotice";
 import HelpRequestScreen from "@/features/recipient/components/HelpRequestScreen";
@@ -201,9 +200,9 @@ export default function RecipientHomeScreen() {
     }, [refresh]),
   );
 
-  const changeRequest = async (cancel: boolean) => {
+  const cancelRequest = async () => {
     if (actionLock.current || loading || error || !recipient) return;
-    if (cancel ? !helpRequest : !!helpRequest) return;
+    if (!helpRequest) return;
 
     actionLock.current = true;
     ++sequence.current;
@@ -219,7 +218,7 @@ export default function RecipientHomeScreen() {
         throw new Error("Kontrollera din inloggning och försök igen.");
       }
 
-      if (cancel && helpRequest) {
+      {
         const { error: cancelError } = await supabase
           .from("help_requests")
           .update({ status: "cancelled" })
@@ -234,25 +233,6 @@ export default function RecipientHomeScreen() {
         }
 
         setHelpRequest(null);
-      } else {
-        const { data: saved, error: createError } = await supabase
-          .from("help_requests")
-          .insert({ recipient_id: recipient.id })
-          .select(REQUEST_COLUMNS)
-          .single();
-
-        if (createError?.code === "23505") {
-          throw new Error(
-            "Det finns redan en aktiv förfrågan. Statusen uppdateras strax.",
-          );
-        }
-
-        if (createError || !saved) {
-          throw new Error("Kunde inte skicka förfrågan. Försök igen.");
-        }
-
-        setHelpRequest(saved as HelpRequest);
-        setOpenRequest(true);
       }
     } catch (failure) {
       setActionMessage(
@@ -346,7 +326,7 @@ export default function RecipientHomeScreen() {
         error={error}
         message={actionMessage}
         onBack={() => setOpenRequest(false)}
-        onCancel={() => void changeRequest(true)}
+        onCancel={() => void cancelRequest()}
         onRetry={() => void refresh()}
         onRespondCompletion={(confirmed) => void respondToCompletion(confirmed)}
         addressNotice={addressNotice}
@@ -455,16 +435,6 @@ export default function RecipientHomeScreen() {
                     ? "Personen använder knappen på sitt armband för att be om hjälp."
                     : "Använd knappen på armbandet för att be om hjälp."}
                 </Text>
-
-                {__DEV__ && (
-                  <View style={styles.sendButton}>
-                    <PrimaryButton
-                      title={busy ? "Skickar…" : "Skicka förfrågan"}
-                      disabled={busy || !recipient}
-                      onPress={() => void changeRequest(false)}
-                    />
-                  </View>
-                )}
               </>
             )}
 
@@ -566,7 +536,6 @@ const styles = StyleSheet.create({
     lineHeight: 23,
     color: colors.textSecondary,
   },
-  sendButton: { marginTop: 20 },
   spacer: { flexGrow: 1 },
   shelterSection: { paddingTop: 26 },
 });

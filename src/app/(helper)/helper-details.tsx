@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -20,6 +21,7 @@ import ScreenHeader from "@/components/ui/ScreenHeader";
 import { colors } from "@/constants/colors";
 import { supabase } from "@/lib/supabase";
 import { formatPhoneNumber, formatPostalCode } from "@/utils/formatters";
+import { validatePersonDetails } from "@/utils/validation";
 
 export default function HelperDetailsScreen() {
   const [firstName, setFirstName] = useState("");
@@ -97,7 +99,19 @@ export default function HelperDetailsScreen() {
     Keyboard.dismiss();
     setMessage("");
 
-    // Validering av obligatoriska fält läggs tillbaka efter testningen.
+    const validationMessage = validatePersonDetails({
+      firstName,
+      lastName,
+      phone,
+      street,
+      postalCode,
+      city,
+    });
+    if (validationMessage) {
+      setMessage(validationMessage);
+      Alert.alert("Kontrollera uppgifterna", validationMessage);
+      return;
+    }
 
     saving.current = true;
     setIsSaving(true);

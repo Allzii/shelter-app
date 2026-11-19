@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -98,10 +99,14 @@ export default function HelperSkillsScreen() {
   const handleContinue = async () => {
     if (saving.current || isFormDisabled) return;
 
-    // Återaktivera efter testning:
-    // if (selected.length === 0) return;
-
     setMessage("");
+    if (selected.length === 0) {
+      const validationMessage =
+        "Välj minst ett alternativ för det du kan hjälpa till med.";
+      setMessage(validationMessage);
+      Alert.alert("Välj vad du kan hjälpa med", validationMessage);
+      return;
+    }
     saving.current = true;
     setIsSaving(true);
 

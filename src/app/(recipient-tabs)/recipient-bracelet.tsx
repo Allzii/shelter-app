@@ -1,13 +1,11 @@
-import { useLocalSearchParams } from "expo-router";
-import { Battery, Clock3, Link2, Vibrate } from "lucide-react-native";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Battery, Clock3, Link2 } from "lucide-react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { colors } from "@/constants/colors";
 import BraceletWifiSetup from "@/features/bracelet/components/BraceletWifiSetup";
 
 export default function RecipientBraceletScreen() {
-  const params = useLocalSearchParams<{ recipientId?: string }>();
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <ScrollView
@@ -27,7 +25,7 @@ export default function RecipientBraceletScreen() {
           </Text>
         </View>
 
-        <BraceletWifiSetup recipientId={params.recipientId} />
+        <BraceletWifiSetup />
 
         <View style={styles.statusGrid}>
           <View style={styles.statusCard}>
@@ -73,22 +71,7 @@ export default function RecipientBraceletScreen() {
         </View>
 
         <Text style={styles.prototypeNote}>
-          Kontrollera kopplingen nedan och prova att förfrågan visas under Hem.
-        </Text>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: true }}
-          disabled
-          style={styles.testButton}
-        >
-          <Vibrate size={21} color={colors.textSecondary} strokeWidth={1.8} />
-
-          <Text style={styles.testButtonText}>Testa armbandet</Text>
-        </Pressable>
-
-        <Text style={styles.testDescription}>
-          Tillgängligt när armbandet kan anslutas och testläget är klart.
+          Prova att förfrågan visas under Hem när du använder armbandets knapp.
         </Text>
       </ScrollView>
     </SafeAreaView>
@@ -174,32 +157,29 @@ const styles = StyleSheet.create({
   },
 
   braceletCard: {
-    paddingHorizontal: 22,
-    paddingTop: 20,
-    paddingBottom: 24,
-    borderRadius: 24,
+    paddingTop: 4,
+    paddingBottom: 12,
     alignItems: "center",
-    backgroundColor: colors.surface,
   },
 
   illustration: {
-    width: 210,
-    height: 195,
+    width: 136,
+    height: 120,
     alignItems: "center",
     justifyContent: "center",
   },
 
   illustrationCircle: {
     position: "absolute",
-    width: 164,
-    height: 164,
-    borderRadius: 82,
-    backgroundColor: "#F0F5F8",
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    backgroundColor: "#DEEBF4",
   },
 
   bracelet: {
     alignItems: "center",
-    transform: [{ rotate: "-12deg" }],
+    transform: [{ scale: 0.6 }, { rotate: "-12deg" }],
   },
 
   topStrap: {
@@ -404,40 +384,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     fontSize: 12,
     lineHeight: 19,
-    color: colors.textSecondary,
-  },
-
-  testButton: {
-    minHeight: 54,
-    marginTop: 22,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    opacity: 0.65,
-  },
-
-  testButtonText: {
-    flexShrink: 1,
-    fontSize: 16,
-    lineHeight: 23,
-    fontWeight: "600",
-    textAlign: "center",
-    color: colors.textSecondary,
-  },
-
-  testDescription: {
-    marginTop: 9,
-    paddingHorizontal: 12,
-    fontSize: 12,
-    lineHeight: 19,
-    textAlign: "center",
     color: colors.textSecondary,
   },
 });

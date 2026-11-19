@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import { Accessibility, ChevronRight, HandHeart } from "lucide-react-native";
+import { useRef, useState } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -11,15 +12,37 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import ScreenHeader from "@/components/ui/ScreenHeader";
 import { colors } from "@/constants/colors";
+import { supabase } from "@/lib/supabase";
 
 export default function RoleScreen() {
   const { width } = useWindowDimensions();
+  const [leaving, setLeaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const leaveLock = useRef(false);
+
+  const returnToStart = async () => {
+    if (leaveLock.current) return;
+    leaveLock.current = true;
+    setLeaving(true);
+    setMessage("");
+    try {
+      const { error } = await supabase.auth.signOut({ scope: "local" });
+      if (error) throw error;
+    } catch {
+      setMessage("Kunde inte gå till startsidan. Försök igen.");
+    } finally {
+      leaveLock.current = false;
+      setLeaving(false);
+    }
+  };
 
   const selectNeedsHelp = () => {
+    if (leaveLock.current) return;
     router.push("/registration-person");
   };
 
   const selectHelper = () => {
+    if (leaveLock.current) return;
     router.push("/helper-verification");
   };
 
@@ -50,7 +73,11 @@ export default function RoleScreen() {
       </View>
 
       <SafeAreaView style={styles.safeArea}>
-        <ScreenHeader />
+        <ScreenHeader
+          onBack={() => void returnToStart()}
+          backDisabled={leaving}
+          backLabel="Till startsidan"
+        />
 
         <View style={styles.content}>
           <Text style={styles.title} maxFontSizeMultiplier={1.3}>
@@ -61,7 +88,15 @@ export default function RoleScreen() {
             Välj det alternativ som passar dig.
           </Text>
 
-          <View style={styles.options}>
+          {message !== "" && (
+            <Text style={styles.subtitle} accessibilityLiveRegion="polite">
+              {message}
+            </Text>
+          )}
+          <View
+            style={styles.options}
+            pointerEvents={leaving ? "none" : "auto"}
+          >
             <Pressable
               onPress={selectNeedsHelp}
               accessibilityRole="button"

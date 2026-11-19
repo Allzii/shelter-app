@@ -3,6 +3,7 @@ import { Check, ChevronDown, Users } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -23,6 +24,7 @@ import { colors } from "@/constants/colors";
 import { relations } from "@/constants/relations";
 import { supabase } from "@/lib/supabase";
 import { capitalizeFirstLetter, formatPhoneNumber } from "@/utils/formatters";
+import { validateEmergencyContact } from "@/utils/validation";
 
 export default function EmergencyContactScreen() {
   const params = useLocalSearchParams<{
@@ -125,6 +127,19 @@ export default function EmergencyContactScreen() {
       setMessage(
         "Personkopplingen saknas. Gå tillbaka till Om dig och tryck på Fortsätt.",
       );
+      return;
+    }
+
+    const validationMessage = validateEmergencyContact({
+      firstName,
+      lastName,
+      phone,
+      relation,
+      otherRelation,
+    });
+    if (validationMessage) {
+      setMessage(validationMessage);
+      Alert.alert("Kontrollera nödkontakten", validationMessage);
       return;
     }
 

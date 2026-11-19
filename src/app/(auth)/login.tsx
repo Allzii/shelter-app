@@ -78,7 +78,7 @@ export default function LoginScreen() {
 
       setPassword("");
       setShowPassword(false);
-      router.replace("/role");
+      // RootLayout opens the saved registration after the auth event.
     } catch {
       setMessage(
         "Kunde inte ansluta. Kontrollera din internetanslutning och försök igen.",

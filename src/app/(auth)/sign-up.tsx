@@ -87,7 +87,7 @@ export default function SignUpScreen() {
       setShowPassword(false);
 
       if (data.session) {
-        router.replace("/role");
+        // RootLayout handles the first role selection and returning accounts.
         return;
       }
 

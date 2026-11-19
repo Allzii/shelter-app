@@ -348,7 +348,7 @@ export default function HelperProfileScreen() {
 
       if (signOutError) throw signOutError;
 
-      router.replace("/login");
+      // RootLayout handles SIGNED_OUT and opens the start screen directly.
     } catch {
       setLogoutMessage("Kunde inte logga ut. Försök igen.");
     } finally {

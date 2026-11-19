@@ -395,6 +395,10 @@ export default function BraceletWifiSetup({
                   <Text style={styles.subtitle}>
                     Vem ska använda armbandet?
                   </Text>
+                  <Text style={styles.text}>
+                    Tryck på rätt registrering för att välja. Du behöver välja
+                    en person innan du fortsätter.
+                  </Text>
                   {people.map((item) => (
                     <Pressable
                       key={item.id}
@@ -402,10 +406,32 @@ export default function BraceletWifiSetup({
                       accessibilityState={{ checked: person?.id === item.id }}
                       disabled={loadingPeople || busy}
                       onPress={() => void choosePerson(item)}
-                      style={styles.textButton}
+                      style={[
+                        styles.personOption,
+                        person?.id === item.id && styles.personOptionSelected,
+                      ]}
                     >
-                      <Text style={styles.link}>
-                        {person?.id === item.id ? "✓ " : ""}
+                      <View style={styles.personOptionHeader}>
+                        <View
+                          style={[
+                            styles.radio,
+                            person?.id === item.id && styles.radioSelected,
+                          ]}
+                        >
+                          {person?.id === item.id && (
+                            <View style={styles.radioDot} />
+                          )}
+                        </View>
+                        <Text style={styles.personRole}>
+                          {item.registration_for === "self"
+                            ? "Jag själv"
+                            : "Någon annan"}
+                        </Text>
+                        {person?.id === item.id && (
+                          <Text style={styles.selectedLabel}>Vald</Text>
+                        )}
+                      </View>
+                      <Text style={styles.personName}>
                         {item.first_name || "Namnlös registrering"}
                         {item.last_name ? ` ${item.last_name}` : ""}
                       </Text>
@@ -441,7 +467,12 @@ export default function BraceletWifiSetup({
               )}
               {person && (
                 <Text style={styles.text}>
-                  Armband för {person.first_name || "vald person"}.
+                  Vald person: {person.first_name || "vald person"}
+                  {person.last_name ? ` ${person.last_name}` : ""}
+                  {"\n"}
+                  {person.registration_for === "self"
+                    ? "Min egen registrering"
+                    : "Registrerad åt någon annan"}
                 </Text>
               )}
               {link && (
@@ -691,9 +722,7 @@ export default function BraceletWifiSetup({
 const styles = StyleSheet.create({
   card: {
     marginTop: 20,
-    padding: 20,
-    borderRadius: 22,
-    backgroundColor: colors.surface,
+    paddingVertical: 4,
   },
   title: {
     fontSize: 21,
@@ -721,6 +750,54 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     color: colors.textSecondary,
+  },
+  personOption: {
+    marginTop: 14,
+    padding: 16,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  personOptionSelected: {
+    borderColor: colors.primary,
+    backgroundColor: "#E7F1F8",
+  },
+  personOptionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 10,
+  },
+  personRole: {
+    flex: 1,
+    fontSize: 17,
+    lineHeight: 24,
+    fontWeight: "700",
+    color: colors.text,
+  },
+  personName: {
+    fontSize: 18,
+    lineHeight: 25,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  selectedLabel: { fontSize: 14, fontWeight: "700", color: colors.primary },
+  radio: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.textSecondary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioSelected: { borderColor: colors.primary },
+  radioDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: colors.primary,
   },
   link: { fontSize: 16, fontWeight: "600", color: colors.primary },
   note: {
